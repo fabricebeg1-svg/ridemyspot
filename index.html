@@ -1,62 +1,225 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Carte Freebord</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Carte Freebord - Lausanne & Fribourg</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    html, body { height: 100%; margin: 0; padding: 0; }
-    #map { width: 100%; height: 100%; }
+    html,body,#map{height:100%;margin:0;padding:0}
+    #map{height:100vh;}
+    .emoji-marker{ font-size:24px; line-height:24px; text-align:center; }
+    .leaflet-popup-content { font-size:14px; }
+    /* optionnel : agrandir les emoji sur écran tactile */
+    @media (max-width:768px){ .emoji-marker{ font-size:28px; } }
   </style>
 </head>
 <body>
-  <div id="map"></div>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script>
-    // Initialisation de la carte
-    const map = L.map('map');
+<div id="map"></div>
 
-    // Couleurs selon la difficulté
-    const colors = {
-      bleu: '#1E90FF',
-      rouge: '#FF0000',
-      noir: '#000000'
-    };
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+  // ---------- Helpers ----------
+  function getStars(n){ return '⭐'.repeat(n); }
+  function getCars(n){ return '🚗'.repeat(n); }
+  function emojiForDiff(d){
+    d = (d||'').toString().toLowerCase();
+    if(d==='bleu') return '🔵';
+    if(d==='rouge') return '🔴';
+    if(d==='noir') return '⚫';
+    return '⚪';
+  }
+  function colorForDiff(d){
+    d = (d||'').toString().toLowerCase();
+    if(d==='bleu') return '#007bff';
+    if(d==='rouge') return '#ff0000';
+    if(d==='noir') return '#000000';
+    return '#666666';
+  }
 
-    // Chargement du GeoJSON depuis le fichier
-    fetch('spots.geojson')
-      .then(response => response.json())
-      .then(data => {
-        const geoJsonLayer = L.geoJSON(data, {
-          style: function(feature) {
-            return { color: colors[feature.properties.difficulte] || '#3388ff', weight: 4 };
-          },
-          onEachFeature: function(feature, layer) {
-            const props = feature.properties;
-            let popupContent = `<b>${props.nom}</b><br>
-              Difficulté : ${props.difficulte}<br>
-              Bitume : ${props.bitume}<br>
-              Trafic : ${props.trafic}<br>
-              Ville : ${props.ville}<br>
-              Canton : ${props.canton}<br>
-              Pays : ${props.pays}<br>
-              <a href="${props.lien}" target="_blank">Google Maps</a><br>
-              <a href="${props.video}" target="_blank">Voir la vidéo</a>`;
-            layer.bindPopup(popupContent);
-          }
-        }).addTo(map);
+  // ---------- Spots ----------
+  var spots = [
+    // --- Lausanne ---
+    {
+      nom:"Les Bains",
+      lat:46.514054, lng:6.618280,
+      difficulte:"rouge",
+      bitume:4, trafic:3,
+      video:"https://www.youtube.com/embed/dQw4w9WgXcQ",
+      lien:"https://maps.app.goo.gl/bXnBMYr7HbhJfJEc8",
+      polyline:[
+        [46.51395,6.61827],[46.5139,6.61824],[46.51385,6.61822],[46.51332,6.61796],[46.51232,6.61746],
+        [46.512,6.61732],[46.51192,6.61724],[46.51191,6.61723],[46.51187,6.61719],[46.51185,6.61716],[46.51183,6.61714]
+      ]
+    },
+    {
+      nom:"Montolivet",
+      lat:46.514071, lng:6.639553,
+      difficulte:"noir",
+      bitume:3, trafic:1,
+      video:"https://www.youtube.com/embed/dQw4w9WgXcQ",
+      lien:"https://maps.app.goo.gl/4pbtwV3fMCweqjh5A",
+      polyline:[
+        [46.5140863,6.6395701],[46.5139238,6.6395057],[46.5133221,6.6394252],
+        [46.5130747,6.6393823],[46.5127831,6.6393233],[46.5124914,6.6392804]
+      ]
+    },
+    {
+      nom:"Derrière les hôpitaux",
+      lat:46.530979, lng:6.646186,
+      difficulte:"bleu",
+      bitume:3, trafic:2,
+      video:"https://www.youtube.com/embed/ysz5S6PUM-U",
+      lien:"https://maps.app.goo.gl/ZR52JcWtqaUND34k9",
+      polyline:[
+        [46.5310463,6.6461827],[46.5300129,6.6461398],[46.5291641,6.6454854],[46.5284481,6.6452493],
+        [46.5276288,6.6451635],[46.5262174,6.6449648],[46.5250363,6.645351],[46.5237519,6.6454369],
+        [46.5223493,6.6460806],[46.5217439,6.6464668]
+      ]
+    },
+    {
+      nom:"Les Poulets",
+      lat:46.531547, lng:6.675879,
+      difficulte:"noir",
+      bitume:5, trafic:2,
+      video:"https://www.youtube.com/watch?v=KU7fv4SWRQU",
+      lien:"https://maps.app.goo.gl/UGEmvP7WUGthtcgr6",
+      polyline:[
+        [46.53165,6.67598],[46.53152,6.67581],[46.53145,6.6757],[46.53143,6.67567],[46.53139,6.67562],
+        [46.5313,6.67549],[46.53126,6.67544],[46.53118,6.67532],[46.53114,6.67527],[46.53109,6.67524],[46.53103,6.67521],[46.53099,6.6752],
+        [46.53094,6.67518],[46.53081,6.67516],[46.53078,6.67515],[46.53062,6.6751],[46.53048,6.67507],[46.53043,6.67508],
+        [46.53037,6.67509],[46.53028,6.67512],[46.53025,6.67514],[46.53001,6.67522],[46.5299,6.67525],[46.52982,6.67527],
+        [46.52978,6.67526],[46.52976,6.67524],[46.52975,6.67521],[46.52972,6.67515],[46.52968,6.67505],[46.52963,6.67496],
+        [46.52962,6.67494],[46.52957,6.67489],[46.52952,6.67487],[46.52949,6.67487],[46.52947,6.67487],[46.5294,6.67489],
+        [46.52934,6.67493],[46.52928,6.67499],[46.52918,6.6751],[46.52916,6.67511],[46.52904,6.67521],[46.529,6.67524],
+        [46.52893,6.67528],[46.52887,6.67529],[46.52883,6.67528],[46.52877,6.67524],[46.52871,6.67518],[46.52866,6.67513],
+        [46.5286,6.67505],[46.52854,6.67496],[46.52851,6.67488],[46.52845,6.67474],[46.52841,6.67462],[46.52834,6.67451],
+        [46.52823,6.67436],[46.52822,6.67435],[46.52807,6.6742],[46.52804,6.67418],[46.52791,6.67407],[46.52779,6.67398],
+        [46.52763,6.67385],[46.5276,6.67382],[46.5275,6.67372],[46.52745,6.67367],[46.52726,6.67345],[46.52717,6.67334],
+        [46.52712,6.67328],[46.52709,6.67323]
+      ]
+    },
+    {
+      nom:"Papi",
+      lat:46.544850, lng:6.656507,
+      difficulte:"bleu",
+      bitume:3, trafic:2,
+      video:"https://www.youtube.com/embed/dQw4w9WgXcQ",
+      lien:"https://maps.app.goo.gl/5yzyrLoRmfjppUSk7",
+      polyline:[
+        [46.54494,6.65655],[46.54479,6.65652],[46.54463,6.65651],[46.54446,6.65651],[46.54422,6.65652],
+        [46.54420,6.65652],[46.54416,6.65652],[46.54409,6.65652],[46.54400,6.65649],[46.54390,6.65643],
+        [46.54366,6.65627],[46.54359,6.65621],[46.54357,6.65616],[46.54356,6.65614],[46.54355,6.65613],
+        [46.54354,6.65605],[46.54354,6.65593],[46.54354,6.65588],[46.54354,6.65573],[46.54353,6.65552],
+        [46.54353,6.65538],[46.54350,6.65531],[46.54347,6.65525],[46.54342,6.65519],[46.54317,6.65500],
+        [46.54310,6.65494],[46.54274,6.65466],[46.54271,6.65463],[46.54268,6.65455],[46.54269,6.65443],
+        [46.54270,6.65419],[46.54273,6.65398],[46.54274,6.65393],[46.54275,6.65382],[46.54305,6.65367],
+        [46.54312,6.65361],[46.54317,6.65351],[46.54320,6.65338],[46.54330,6.65267],[46.54332,6.65249],
+        [46.54356,6.65088],[46.54358,6.65074],[46.54360,6.65060],[46.54361,6.65045],[46.54361,6.65023],
+        [46.54360,6.65022],[46.54359,6.65006],[46.54353,6.64984],[46.54351,6.64972],[46.54350,6.64967],
+        [46.54349,6.64952],[46.54349,6.64934],[46.54350,6.64921],[46.54352,6.64905],[46.54356,6.64889],
+        [46.54361,6.64869],[46.54362,6.64864],[46.54364,6.64853],[46.54366,6.64845],[46.54368,6.64836],
+        [46.54367,6.64820],[46.54363,6.64808],[46.54340,6.64822],[46.54338,6.64822],[46.54320,6.64831],
+        [46.54288,6.64853],[46.54272,6.64866],[46.54262,6.64877],[46.54259,6.64883],[46.54245,6.64900],
+        [46.54238,6.64908],[46.54216,6.64931],[46.54206,6.64941],[46.54196,6.64952],[46.54187,6.64962],
+        [46.54181,6.64967],[46.54173,6.64973],[46.54164,6.64975],[46.54152,6.64977],[46.54140,6.64976],
+        [46.54133,6.64974],[46.54120,6.64968],[46.54105,6.64958],[46.54090,6.64946],[46.54083,6.64942],
+        [46.54065,6.64927],[46.54031,6.64897],[46.54010,6.64875],[46.54008,6.64873],[46.53992,6.64858],
+        [46.53970,6.64834],[46.53967,6.64832],[46.53962,6.64830],[46.53948,6.64803],[46.53944,6.64799],
+        [46.53924,6.64777],[46.53902,6.64752],[46.53878,6.64728],[46.53873,6.64723],[46.53863,6.64713],
+        [46.53844,6.64695],[46.53818,6.64671],[46.53808,6.64650],[46.53801,6.64654],[46.53796,6.64657],
+        [46.53792,6.64660],[46.53775,6.64673],[46.53761,6.64687],[46.53740,6.64717],[46.53705,6.64785],
+        [46.53700,6.64793],[46.53695,6.64803],[46.53686,6.64823],[46.53684,6.64828],[46.53674,6.64846],
+        [46.53660,6.64878],[46.53643,6.64857],[46.53597,6.64807],[46.53588,6.64797],[46.53583,6.64794],
+        [46.53574,6.64787],[46.53558,6.64777],[46.53544,6.64769],[46.53513,6.64756],[46.53494,6.64748],
+        [46.53478,6.64741],[46.53476,6.64740],[46.53462,6.64733],[46.53440,6.64725],[46.53435,6.64725],
+        [46.53431,6.64724],[46.53415,6.64722],[46.53403,6.64720],[46.53400,6.64719],[46.53384,6.64717],
+        [46.53378,6.64716],[46.53375,6.64710],[46.53372,6.64704],[46.53340,6.64692],[46.53337,6.64704],
+        [46.53304,6.64687],[46.53314,6.64640],[46.53272,6.64619],[46.53258,6.64613],[46.53256,6.64613],
+        [46.53244,6.64607],[46.53228,6.64674],[46.53227,6.64676],[46.53227,6.64677],[46.53226,6.64677],
+        [46.53225,6.64678],[46.53224,6.64677],[46.53221,6.64676],[46.53184,6.64659],[46.53158,6.64646],
+        [46.53133,6.64632],[46.53118,6.64620],[46.53118,6.64621],[46.53117,6.64621],[46.53117,6.64622],
+        [46.53117,6.64623],[46.53116,6.64623],[46.53116,6.64624],[46.53115,6.64625],[46.53114,6.64625],
+        [46.53114,6.64626],[46.53113,6.64626],[46.53112,6.64626],[46.53111,6.64626],[46.53110,6.64626],
+        [46.53109,6.64625],[46.53109,6.64625],[46.53108,6.64624],[46.53107,6.64623],[46.53107,6.64623],
+        [46.53106,6.64622],[46.53106,6.64621],[46.53105,6.64621]
+      ]
+    },
+    {
+      nom:"Béthusy",
+      lat:46.521658, lng:6.646366,
+      difficulte:"bleu",
+      bitume:3, trafic:3.5,
+      video:"https://www.youtube.com/embed/dQw4w9WgXcQ",
+      lien:"https://maps.app.goo.gl/yto3Nq9PzUzBHvqw6",
+      polyline:[
+        [46.52171,6.64655],[46.52169,6.64656],[46.52157,6.64629],[46.52148,6.64608],
+        [46.52144,6.64596],[46.52131,6.64556],[46.52131,6.64555],[46.52124,6.64531],
+        [46.52117,6.64498],[46.52114,6.64485],[46.52108,6.64455],[46.52105,6.64415],
+        [46.52103,6.64371],[46.52103,6.64342],[46.52103,6.64338],[46.52104,6.64331],
+        [46.52106,6.64288],[46.52107,6.64275],[46.52110,6.64239],[46.52111,6.64219],
+        [46.52112,6.64207],[46.52113,6.64195],[46.52114,6.64191],[46.52115,6.64179]
+      ]
+    },
+    // --- Fribourg ---
+    {
+      nom:"Canyon",
+      lat:46.805, lng:7.163,
+      difficulte:"noir",
+      bitume:5, trafic:1,
+      video:"https://www.youtube.com/embed/dQw4w9WgXcQ",
+      lien:"#",
+      polyline:[ [46.805,7.163],[46.8045,7.1628],[46.804,7.1625] ]
+    },
+    {
+      nom:"La Côte",
+      lat:46.808, lng:7.175,
+      difficulte:"rouge",
+      bitume:4, trafic:2,
+      video:"https://www.youtube.com/embed/dQw4w9WgXcQ",
+      lien:"#",
+      polyline:[ [46.808,7.175],[46.8075,7.1745],[46.807,7.174] ]
+    }
+  ];
 
-        // Ajuster la vue pour tous les spots
-        map.fitBounds(geoJsonLayer.getBounds());
-      })
-      .catch(err => console.error('Erreur chargement GeoJSON:', err));
+  // ---------- Map ----------
+  var map = L.map('map').setView([46.521,6.64], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    maxZoom:19
+  }).addTo(map);
 
-    // Ajouter une couche OpenStreetMap
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '© OpenStreetMap'
+  // ---------- Markers & Polylines ----------
+  spots.forEach(s=>{
+    var marker = L.marker([s.lat,s.lng], {
+      icon: L.divIcon({className:'emoji-marker', html:emojiForDiff(s.difficulte)})
     }).addTo(map);
-  </script>
+    marker.bindPopup(`
+      <b>${s.nom}</b><br/>
+      Difficulté: ${s.difficulte}<br/>
+      Bitume: ${getStars(s.bitume)}<br/>
+      Trafic: ${getCars(s.trafic)}<br/>
+      <a href="${s.lien}" target="_blank">Google Maps</a><br/>
+      <iframe width="200" height="113" src="${s.video}" frameborder="0" allowfullscreen></iframe>
+    `);
+
+    var poly = L.polyline(s.polyline,{color:colorForDiff(s.difficulte),weight:4,opacity:0.7}).addTo(map);
+  });
+
+  // ---------- Geolocation ----------
+  var gpsMarker;
+  if (navigator.geolocation){
+    navigator.geolocation.watchPosition(
+      function(pos){
+        var latlng = [pos.coords.latitude,pos.coords.longitude];
+        if(!gpsMarker){
+          gpsMarker = L.marker(latlng,{icon:L.divIcon({className:'emoji-marker',html:'📍'})}).addTo(map);
+        } else { gpsMarker.setLatLng(latlng); }
+        map.panTo(latlng);
+      },
+      function(err){ console.warn('Erreur GPS:',err); },
+      {enableHighAccuracy:true, maximumAge:1000, timeout:10000}
+    );
+  } else { alert("La géolocalisation n'est pas supportée par ce navigateur."); }
+</script>
 </body>
 </html>
