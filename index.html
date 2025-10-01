@@ -1,407 +1,162 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <title>Carte des Spots Freebord</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-  <style>
-    html,body { height:100%; margin:0; padding:0; }
-    #map { width:100%; height:100vh; }
-
-    /* Contrôles */
-    .control-button {
-      position: absolute;
-      right: 10px;
-      background: #fff;
-      padding: 8px 10px;
-      border-radius: 6px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      cursor: pointer;
-      z-index: 1000;
-      font-weight:600;
-    }
-    #filterBtn { top:10px; }
-    #addBtn { top:60px; }
-
-    /* Panels */
-    .panel {
-      display: none;
-      position: absolute;
-      right: 10px;
-      top: 110px;
-      z-index: 1000;
-      background: #fff;
-      padding: 10px;
-      border-radius: 6px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-      min-width: 240px;
-    }
-
-    label { font-size:14px; display:block; margin-top:8px; }
-    input[type=text], select { width:100%; padding:6px; box-sizing:border-box; margin-top:4px; }
-
-    /* Icône emoji circulaire (créée inline par JS aussi) */
-    .emoji-icon {
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:#fff;
-      font-size:16px;
-      width:34px;
-      height:34px;
-      border-radius:50%;
-      border:2px solid #fff;
-      box-shadow:0 1px 2px rgba(0,0,0,0.3);
-    }
-
-    /* Modal / formulaire (si tu veux plus tard une modal) */
-    .submit-btn { margin-top:10px; padding:8px 10px; background:#007bff; color:#fff; border:none; border-radius:4px; cursor:pointer; }
-    .submit-btn:hover { background:#0056b3; }
-  </style>
+<meta charset="UTF-8">
+<title>Carte Freebord</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<style>
+  #map { height: 100vh; }
+  .marker-bleu { font-size: 24px; color: blue; }
+  .marker-rouge { font-size: 24px; color: red; }
+  .marker-noir { font-size: 24px; color: black; }
+  #filterPanel, #addSpotPanel { background: white; padding: 10px; position: absolute; top: 10px; right: 10px; z-index: 1000; border: 1px solid #ccc; border-radius: 5px; display: none;}
+  .buttonPanel { position: absolute; top: 10px; right: 10px; z-index: 1001; }
+</style>
 </head>
 <body>
-  <div id="map"></div>
 
-  <!-- Boutons -->
-  <div id="filterBtn" class="control-button" onclick="togglePanel('filterPanel')">Filtres</div>
-  <div id="addBtn" class="control-button" onclick="togglePanel('addPanel')">Ajouter un spot</div>
+<div id="map"></div>
 
-  <!-- Panel Filtres -->
-  <div id="filterPanel" class="panel" aria-hidden="true">
-    <h4 style="margin:0 0 8px 0;">Filtres</h4>
-    <label>Ville
-      <select id="filterVille"><option value="">Toutes</option></select>
-    </label>
-    <label>Canton / Région
-      <select id="filterCanton"><option value="">Tous</option></select>
-    </label>
-    <label>Pays
-      <select id="filterPays"><option value="">Tous</option></select>
-    </label>
-    <label>Difficulté
-      <select id="filterDifficulte">
-        <option value="">Toutes</option>
-        <option value="facile">Facile (Bleu)</option>
-        <option value="moyen">Moyen (Rouge)</option>
-        <option value="difficile">Difficile (Noir)</option>
-      </select>
-    </label>
-    <button class="submit-btn" onclick="applyFilters()">Appliquer</button>
-  </div>
+<div class="buttonPanel">
+  <button id="filterBtn">Filtrer</button>
+  <button id="addSpotBtn">Ajouter un spot</button>
+  <button id="helpBtn">Help</button>
+</div>
 
-  <!-- Panel Ajouter un spot -->
-  <div id="addPanel" class="panel" aria-hidden="true" style="top: 200px;">
-    <h4 style="margin:0 0 8px 0;">Ajouter un spot</h4>
+<div id="filterPanel">
+  <label>Pays: <select id="filterCountry"></select></label><br>
+  <label>Canton/Région: <select id="filterCanton"></select></label><br>
+  <label>Ville: <select id="filterCity"></select></label><br>
+  <label>Difficulté: 
+    <select id="filterDifficulty">
+      <option value="">Toutes</option>
+      <option value="bleu">Facile</option>
+      <option value="rouge">Moyen</option>
+      <option value="noir">Difficile</option>
+    </select>
+  </label>
+</div>
 
-    <label>Nom du spot
-      <input type="text" id="spotNom" placeholder="Nom (ex: Les Bains)">
-    </label>
+<div id="addSpotPanel">
+  <label>Nom: <input type="text" id="spotName"></label><br>
+  <label>Lien Google Maps du tracé: <input type="text" id="spotCoords" placeholder="https://www.google.com/maps/..."></label><br>
+  <label>Ville: <input type="text" id="spotCity"></label><br>
+  <label>Canton/Région: <input type="text" id="spotCanton"></label><br>
+  <label>Pays: <input type="text" id="spotCountry"></label><br>
+  <label>Difficulté: 
+    <select id="spotDifficulty">
+      <option value="bleu">Facile</option>
+      <option value="rouge">Moyen</option>
+      <option value="noir">Difficile</option>
+    </select>
+  </label><br>
+  <label>Bitume (1-5): 
+    <select id="spotBitume">
+      <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+    </select>
+  </label><br>
+  <label>Trafic (1-5): 
+    <select id="spotTraffic">
+      <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+    </select>
+  </label><br>
+  <label>Vidéo (URL): <input type="text" id="spotVideo"></label><br>
+  <button id="spotSendBtn">Envoyer</button>
+</div>
 
-    <label>Pays
-      <input type="text" id="spotPays" placeholder="Suisse">
-    </label>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
 
-    <label>Canton / Région
-      <input type="text" id="spotCanton" placeholder="VD">
-    </label>
+// --- Initialisation de la carte ---
+const map = L.map('map').setView([46.5191, 6.5668], 13); // centrée sur Lausanne par défaut
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
 
-    <label>Ville
-      <input type="text" id="spotVille" placeholder="Lausanne">
-    </label>
+// --- Spots ---
+const spots = [
+  {
+    nom: "Les Bains",
+    difficulte: "rouge",
+    bitume: 4,
+    trafic: 3,
+    video: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    lien: "https://maps.app.goo.gl/bXnBMYr7HbhJfJEc8",
+    ville: "Lausanne",
+    canton: "VD",
+    pays: "Suisse",
+    coordinates: [
+      [46.51395,6.61827],[46.5139,6.61824],[46.51385,6.61822],[46.51332,6.61796],[46.51232,6.61746],
+      [46.512,6.61732],[46.51192,6.61724],[46.51191,6.61723],[46.51187,6.61719],[46.51185,6.61716],[46.51183,6.61714]
+    ]
+  }
+];
 
-    <label>Difficulté
-      <select id="spotDifficulte">
-        <option value="facile">Facile (bleu)</option>
-        <option value="moyen">Moyen (rouge)</option>
-        <option value="difficile">Difficile (noir)</option>
-      </select>
-    </label>
+const polylines = {};
+const markers = {};
 
-    <label>Qualité du bitume
-      <select id="spotBitume">
-        <option value="1">⭐</option>
-        <option value="2">⭐⭐</option>
-        <option value="3">⭐⭐⭐</option>
-        <option value="4">⭐⭐⭐⭐</option>
-        <option value="5">⭐⭐⭐⭐⭐</option>
-      </select>
-    </label>
-
-    <label>Trafic (1–5)
-      <select id="spotTrafic">
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-        <option value="5">5</option>
-      </select>
-    </label>
-
-    <label>Lien vidéo (YouTube)
-      <input type="text" id="spotVideo" placeholder="https://www.youtube.com/watch?v=...">
-    </label>
-
-    <label>Lien Google Maps (point départ)
-      <input type="text" id="spotMaps" placeholder="https://maps.app.goo.gl/... ou https://maps.google.com/?q=...">
-    </label>
-
-    <label>Tracé GPS (coordonnées lat,lng séparées par des points-virgules ou lien)
-      <input type="text" id="spotTrace" placeholder="ex: 46.51395,6.61827;46.5139,6.61824;...">
-    </label>
-
-    <button class="submit-btn" onclick="envoyerSpot()">Envoyer</button>
-    <div style="font-size:12px;margin-top:6px;color:#555;">(Envoi par e-mail ; tu valides manuellement ensuite.)</div>
-  </div>
-
-  <script>
-    /*****************************
-     * CONFIG COULEURS / EMOJI
-     *****************************/
-    // correspondance demandée :
-    // facile -> BLEU ; moyen -> ROUGE ; difficile -> NOIR
-    const colorMap = {
-      facile: '#1E90FF',
-      moyen:  '#FF0000',
-      difficile: '#000000'
-    };
-    const emojiMap = {
-      facile: '🔵',
-      moyen:  '🔴',
-      difficile: '⚫'
-    };
-
-    /*****************************
-     * INITIALISATION CARTE
-     *****************************/
-    const map = L.map('map').setView([46.52, 6.63], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution:'© OpenStreetMap' }).addTo(map);
-
-    // Position utilisateur (watch, sans recentrer)
-    let userMarker = null;
-    if (navigator.geolocation) {
-      navigator.geolocation.watchPosition(pos => {
-        const lat = pos.coords.latitude;
-        const lon = pos.coords.longitude;
-        if (!userMarker) {
-          userMarker = L.circleMarker([lat, lon], { radius:6, color:'#2ecc71', fillColor:'#2ecc71', fillOpacity:0.9 }).addTo(map).bindPopup('Vous êtes ici');
-        } else {
-          userMarker.setLatLng([lat, lon]);
-        }
-      }, err => { console.warn('GPS error', err); }, { enableHighAccuracy:true });
+// --- Fonction pour créer un marker avec pop-up ---
+function addSpotMarker(spot) {
+  const emoji = spot.difficulte === "bleu" ? "🔵" : spot.difficulte === "rouge" ? "🔴" : "⚫";
+  const marker = L.marker(spot.coordinates[0], {
+    icon: L.divIcon({
+      className: `marker-${spot.difficulte}`,
+      html: emoji,
+      iconSize: [24,24]
+    })
+  }).addTo(map);
+  marker.bindPopup(`
+    <b>${spot.nom}</b><br>
+    Bitume: ${spot.bitume}/5<br>
+    Trafic: ${spot.trafic}/5<br>
+    <a href="${spot.video}" target="_blank">Vidéo</a><br>
+    <a href="${spot.lien}" target="_blank">Départ Google Maps</a>
+  `);
+  marker.on('click', () => {
+    if (polylines[spot.nom]) {
+      map.removeLayer(polylines[spot.nom]);
+      delete polylines[spot.nom];
+    } else {
+      polylines[spot.nom] = L.polyline(spot.coordinates, {color: spot.difficulte}).addTo(map);
     }
+  });
+  markers[spot.nom] = marker;
+}
 
-    /*****************************
-     * SPOTS (avec POLYLINE LES BAINS)
-     *****************************/
-    // NOTE: coords = [lat, lng] (ordre correct pour Leaflet)
-    const spots = [
-      {
-        nom: "Les Bains",
-        difficulte: "moyen",   // 'facile' | 'moyen' | 'difficile'
-        bitume: 4,
-        trafic: 3,
-        video: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-        lien: "https://maps.app.goo.gl/bXnBMYr7HbhJfJEc8",
-        pays: "Suisse",
-        canton: "VD",
-        ville: "Lausanne",
-        // Polyline complète (convertie en [lat,lng]) — tu l'avais fournie précédemment
-        coords: [
-          [46.51395,6.61827],[46.5139,6.61824],[46.51385,6.61822],[46.51332,6.61796],[46.51232,6.61746],
-          [46.51200,6.61732],[46.51192,6.61724],[46.51191,6.61723],[46.51187,6.61719],[46.51185,6.61716],[46.51183,6.61714]
-        ]
-      }
-    ];
+// --- Initialisation markers ---
+spots.forEach(addSpotMarker);
 
-    /*****************************
-     * RENDER / REGISTRY
-     *****************************/
-    const registry = []; // { spot, marker, polyline }
+// --- Boutons ---
+const filterPanel = document.getElementById('filterPanel');
+const addSpotPanel = document.getElementById('addSpotPanel');
+document.getElementById('filterBtn').addEventListener('click', () => {
+  filterPanel.style.display = filterPanel.style.display === 'none' ? 'block' : 'none';
+});
+document.getElementById('addSpotBtn').addEventListener('click', () => {
+  addSpotPanel.style.display = addSpotPanel.style.display === 'none' ? 'block' : 'none';
+});
+document.getElementById('helpBtn').addEventListener('click', () => {
+  window.location.href = 'mailto:tonmail@example.com?subject=Aide Freebord';
+});
 
-    // helper: create a circular emoji divIcon (no default marker image)
-    function createEmojiIcon(backgroundColor, emoji) {
-      const html = `<div class="emoji-icon" style="background:${backgroundColor}">${emoji}</div>`;
-      return L.divIcon({
-        html,
-        className: '', // empty to avoid extra default styles
-        iconSize: [34,34],
-        iconAnchor: [17,17],
-        popupAnchor: [0,-18]
-      });
-    }
+// --- Envoyer un spot ---
+document.getElementById('spotSendBtn').addEventListener('click', () => {
+  const nom = document.getElementById('spotName').value;
+  const coords = document.getElementById('spotCoords').value;
+  const ville = document.getElementById('spotCity').value;
+  const canton = document.getElementById('spotCanton').value;
+  const pays = document.getElementById('spotCountry').value;
+  const difficulte = document.getElementById('spotDifficulty').value;
+  const bitume = document.getElementById('spotBitume').value;
+  const trafic = document.getElementById('spotTraffic').value;
+  const video = document.getElementById('spotVideo').value;
+  
+  const mailBody = `Nom: ${nom}\nCoordonnées Google Maps: ${coords}\nVille: ${ville}\nCanton/Région: ${canton}\nPays: ${pays}\nDifficulté: ${difficulte}\nBitume: ${bitume}\nTrafic: ${trafic}\nVidéo: ${video}`;
+  window.location.href = `mailto:tonmail@example.com?subject=Nouveau Spot Freebord&body=${encodeURIComponent(mailBody)}`;
+});
 
-    function renderSpots() {
-      // clear existing
-      registry.forEach(r => {
-        if (r.marker && map.hasLayer(r.marker)) map.removeLayer(r.marker);
-        if (r.polyline && map.hasLayer(r.polyline)) map.removeLayer(r.polyline);
-      });
-      registry.length = 0;
+</script>
 
-      spots.forEach((s, idx) => {
-        const color = colorMap[s.difficulte] || '#888';
-        const emoji = emojiMap[s.difficulte] || '⚪';
-        const first = s.coords[0];
-
-        // create marker with divIcon (no double marker)
-        const marker = L.marker(first, { icon: createEmojiIcon(color, emoji) }).addTo(map);
-
-        // popup content (affiche les infos essentielles + liens)
-        const popupHTML = `
-          <b>${s.nom}</b><br>
-          ${s.ville ? (s.ville + ', ') : ''}${s.canton ? (s.canton + ', ') : ''}${s.pays ? s.pays : ''}<br>
-          Difficulté: ${s.difficulte}<br>
-          Bitume: ${'⭐'.repeat(s.bitume || 0)}<br>
-          Trafic: ${s.trafic || 0}/5<br>
-          <a href="${s.video}" target="_blank">🎥 Vidéo YouTube</a><br>
-          <a href="${s.lien}" target="_blank">📍 Point de départ (Google Maps)</a>
-        `;
-        marker.bindPopup(popupHTML);
-
-        // polyline (not added to map by default)
-        const polyline = L.polyline(s.coords, { color: color, weight: 4, opacity: 0.9 });
-
-        // toggle polyline on marker click (multiple can be shown)
-        marker.on('click', () => {
-          if (map.hasLayer(polyline)) map.removeLayer(polyline);
-          else map.addLayer(polyline);
-        });
-
-        registry.push({ spot:s, marker, polyline });
-      });
-    }
-
-    // initial render
-    renderSpots();
-
-    /*****************************
-     * FILTRES DYNAMIQUES
-     *****************************/
-    function populateFilters() {
-      const paysSet = new Set();
-      const cantonSet = new Set();
-      const villeSet = new Set();
-
-      spots.forEach(s => {
-        if (s.pays) paysSet.add(s.pays);
-        if (s.canton) cantonSet.add(s.canton);
-        if (s.ville) villeSet.add(s.ville);
-      });
-
-      const selPays = document.getElementById('filterPays');
-      const selCanton = document.getElementById('filterCanton');
-      const selVille = document.getElementById('filterVille');
-
-      // reset
-      selPays.innerHTML = '<option value="">Tous</option>';
-      selCanton.innerHTML = '<option value="">Tous</option>';
-      selVille.innerHTML = '<option value="">Toutes</option>';
-
-      Array.from(paysSet).sort().forEach(v => {
-        const o = document.createElement('option'); o.value = v; o.textContent = v; selPays.appendChild(o);
-      });
-      Array.from(cantonSet).sort().forEach(v => {
-        const o = document.createElement('option'); o.value = v; o.textContent = v; selCanton.appendChild(o);
-      });
-      Array.from(villeSet).sort().forEach(v => {
-        const o = document.createElement('option'); o.value = v; o.textContent = v; selVille.appendChild(o);
-      });
-    }
-
-    populateFilters();
-
-    function applyFilters() {
-      const fp = document.getElementById('filterPays').value;
-      const fc = document.getElementById('filterCanton').value;
-      const fv = document.getElementById('filterVille').value;
-      const fd = document.getElementById('filterDifficulte').value;
-
-      registry.forEach(r => {
-        const s = r.spot;
-        const match =
-          (!fp || s.pays === fp) &&
-          (!fc || s.canton === fc) &&
-          (!fv || s.ville === fv) &&
-          (!fd || s.difficulte === fd);
-
-        if (match) {
-          if (!map.hasLayer(r.marker)) map.addLayer(r.marker);
-        } else {
-          if (map.hasLayer(r.marker)) map.removeLayer(r.marker);
-          if (map.hasLayer(r.polyline)) map.removeLayer(r.polyline);
-        }
-      });
-    }
-
-    /*****************************
-     * UI: toggle panels
-     *****************************/
-    function togglePanel(id) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.style.display = (el.style.display === 'block') ? 'none' : 'block';
-      // ensure filter panel is hidden when add panel opened and vice versa? keep independent
-    }
-
-    /*****************************
-     * AJOUT/ENVOI SPOT (mailto)
-     *
-     * Envoi par mail (mailto). Remplacer 'tonmail@exemple.com' par ton mail.
-     *****************************/
-    function envoyerSpot() {
-      const nom = document.getElementById('spotNom').value || '';
-      const pays = document.getElementById('spotPays').value || '';
-      const canton = document.getElementById('spotCanton').value || '';
-      const ville = document.getElementById('spotVille').value || '';
-      const difficulte = document.getElementById('spotDifficulte').value || '';
-      const bitume = document.getElementById('spotBitume').value || '';
-      const trafic = document.getElementById('spotTrafic').value || '';
-      const video = document.getElementById('spotVideo').value || '';
-      const maps = document.getElementById('spotMaps').value || '';
-      const trace = document.getElementById('spotTrace').value || '';
-
-      // body text (ligne par ligne)
-      const lines = [
-        `Nom: ${nom}`,
-        `Pays: ${pays}`,
-        `Canton/Region: ${canton}`,
-        `Ville: ${ville}`,
-        `Difficulté: ${difficulte}`,
-        `Bitume: ${bitume}`,
-        `Trafic: ${trafic}`,
-        `Vidéo: ${video}`,
-        `Google Maps (départ): ${maps}`,
-        `Tracé (texte): ${trace}`,
-        '',
-        '--- Veuillez valider et ajouter le spot manuellement ---'
-      ];
-      const body = encodeURIComponent(lines.join('\n'));
-
-      // Remplace par ton adresse mail
-      const mail = 'tonmail@exemple.com';
-      const subject = encodeURIComponent('Nouveau spot proposé');
-      window.location.href = `mailto:${mail}?subject=${subject}&body=${body}`;
-    }
-
-    /*****************************
-     * UTILS / AIDE
-     *****************************/
-    // Si tu veux ajouter un spot MANUELLEMENT via JS (après validation mail) :
-    // Exemple :
-    // const newSpot = {
-    //   nom:"Nouveau", difficulte:"facile", bitume:3, trafic:2, video:"", lien:"", pays:"Suisse", canton:"VD", ville:"Lausanne",
-    //   coords: [[46.51,6.61],[46.52,6.62]]
-    // };
-    // spots.push(newSpot); populateFilters(); renderSpots();
-
-    // ATTENTION: si tu ajoutes beaucoup de spots, appelle renderSpots() après avoir rempli spots,
-    // puis populateFilters() pour mettre à jour les selects.
-
-  </script>
 </body>
 </html>
