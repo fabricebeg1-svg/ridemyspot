@@ -7,22 +7,53 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
   #map { height: 100vh; }
+
+  /* Bouton filtre et fenêtre */
+  #filter-container {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+    text-align: right;
+  }
+
+  #filter-button {
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+  }
+
+  #filters {
+    display: none;
+    margin-top: 5px;
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    text-align: left;
+  }
+
   .emoji-marker { font-size: 24px; }
-  #filters { position: absolute; top: 10px; left: 10px; background: white; padding: 10px; z-index: 1000; border-radius: 5px; box-shadow: 0 0 5px rgba(0,0,0,0.3); }
 </style>
 </head>
 <body>
 
-<div id="filters">
-  <label>Pays: <select id="filter-pays"><option value="">Tous</option></select></label><br>
-  <label>Canton: <select id="filter-canton"><option value="">Tous</option></select></label><br>
-  <label>Ville: <select id="filter-ville"><option value="">Toutes</option></select></label><br>
-  <label>Difficulté: <select id="filter-difficulte"><option value="">Toutes</option>
-    <option value="bleu">Bleu</option>
-    <option value="rouge">Rouge</option>
-    <option value="noir">Noir</option>
-  </select></label><br>
-  <button id="apply-filters">Appliquer</button>
+<div id="filter-container">
+  <div id="filter-button">Filtre</div>
+  <div id="filters">
+    <label>Pays: <select id="filter-pays"><option value="">Tous</option></select></label><br>
+    <label>Canton: <select id="filter-canton"><option value="">Tous</option></select></label><br>
+    <label>Ville: <select id="filter-ville"><option value="">Toutes</option></select></label><br>
+    <label>Difficulté: <select id="filter-difficulte"><option value="">Toutes</option>
+      <option value="bleu">Bleu</option>
+      <option value="rouge">Rouge</option>
+      <option value="noir">Noir</option>
+    </select></label><br>
+    <button id="apply-filters">Appliquer</button>
+  </div>
 </div>
 
 <div id="map"></div>
@@ -47,13 +78,11 @@ const spots = [
       [46.512, 6.61732],[46.51192, 6.61724],[46.51191, 6.61723],[46.51187, 6.61719],[46.51185, 6.61716],[46.51183, 6.61714]
     ]
   }
-  // Tu peux rajouter d'autres spots ici
 ];
 
 // --- INIT MAP ---
 const map = L.map('map').setView([46.52, 6.63], 13);
 
-// Tile layer
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
@@ -123,11 +152,8 @@ spots.forEach(spot => {
   const polyline = L.polyline(spot.coordinates, { color: spot.difficulte, weight: 4 });
 
   marker.on('click', () => {
-    if (map.hasLayer(polyline)) {
-      map.removeLayer(polyline);
-    } else {
-      map.addLayer(polyline);
-    }
+    if (map.hasLayer(polyline)) map.removeLayer(polyline);
+    else map.addLayer(polyline);
   });
 
   const popupContent = `
@@ -140,6 +166,14 @@ spots.forEach(spot => {
 
   markers.push(marker);
   lines.push(polyline);
+});
+
+// --- BOUTON FILTRE ---
+const filterButton = document.getElementById('filter-button');
+const filterDiv = document.getElementById('filters');
+
+filterButton.addEventListener('click', () => {
+  filterDiv.style.display = filterDiv.style.display === 'block' ? 'none' : 'block';
 });
 
 // --- APPLICATION DES FILTRES ---
