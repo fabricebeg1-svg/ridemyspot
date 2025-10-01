@@ -1,122 +1,168 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>Carte Freebord</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <style>
-        #map { height: 100vh; }
-        .emoji-marker {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            color: white;
-            text-align: center;
-            border: 2px solid white;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Carte Freebord</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  #map { height: 100vh; }
+  .emoji-marker { font-size: 24px; }
+  #filters { position: absolute; top: 10px; left: 10px; background: white; padding: 10px; z-index: 1000; border-radius: 5px; box-shadow: 0 0 5px rgba(0,0,0,0.3); }
+</style>
 </head>
 <body>
+
+<div id="filters">
+  <label>Pays: <select id="filter-pays"><option value="">Tous</option></select></label><br>
+  <label>Canton: <select id="filter-canton"><option value="">Tous</option></select></label><br>
+  <label>Ville: <select id="filter-ville"><option value="">Toutes</option></select></label><br>
+  <label>Difficulté: <select id="filter-difficulte"><option value="">Toutes</option>
+    <option value="bleu">Bleu</option>
+    <option value="rouge">Rouge</option>
+    <option value="noir">Noir</option>
+  </select></label><br>
+  <button id="apply-filters">Appliquer</button>
+</div>
+
 <div id="map"></div>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // Initialisation de la carte
-    const map = L.map('map').setView([46.51395, 6.61827], 15);
 
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+// --- SPOTS DE BASE ---
+const spots = [
+  {
+    nom: "Les Bains",
+    difficulte: "rouge",
+    bitume: 4,
+    trafic: 3,
+    video: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    lien: "https://maps.app.goo.gl/bXnBMYr7HbhJfJEc8",
+    ville: "Lausanne",
+    canton: "VD",
+    pays: "Suisse",
+    coordinates: [
+      [46.51395, 6.61827],[46.5139, 6.61824],[46.51385, 6.61822],[46.51332, 6.61796],[46.51232, 6.61746],
+      [46.512, 6.61732],[46.51192, 6.61724],[46.51191, 6.61723],[46.51187, 6.61719],[46.51185, 6.61716],[46.51183, 6.61714]
+    ]
+  }
+  // Tu peux rajouter d'autres spots ici
+];
 
-    // Spot “Les Bains”
-    const spot = {
-        nom: "Les Bains",
-        difficulte: "rouge",
-        bitume: 4,
-        trafic: 3,
-        video: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-        lien: "https://maps.app.goo.gl/bXnBMYr7HbhJfJEc8",
-          pays: "Suisse",    // ajouté pour filtres
-  canton: "VD",      // ajouté pour filtres
-  ville: "Lausanne", // ajouté pour filtres
-        coords: [
-            [46.51395,6.61827],[46.5139,6.61824],[46.51385,6.61822],[46.51332,6.61796],[46.51232,6.61746]
-        ]
-    };
+// --- INIT MAP ---
+const map = L.map('map').setView([46.52, 6.63], 13);
 
-    // Fonction pour créer un marqueur rond avec emoji
-    function createEmojiMarker(latlng, color, emoji) {
-        const icon = L.divIcon({
-            className: 'emoji-marker',
-            html: emoji,
-            iconSize: [32, 32],
-            iconAnchor: [16, 16],
-            popupAnchor: [0, -16],
-            style: `background-color:${color}`
-        });
-        return L.marker(latlng, { icon });
+// Tile layer
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+// --- POSITION EN DIRECT ---
+let userMarker = null;
+navigator.geolocation.watchPosition(pos => {
+  const lat = pos.coords.latitude;
+  const lon = pos.coords.longitude;
+  if (!userMarker) {
+    userMarker = L.marker([lat, lon]).addTo(map).bindPopup("Vous êtes ici");
+  } else {
+    userMarker.setLatLng([lat, lon]);
+  }
+});
+
+// --- FILTRES DYNAMIQUES ---
+function remplirFiltres() {
+  const paysSet = new Set();
+  const cantonSet = new Set();
+  const villeSet = new Set();
+
+  spots.forEach(spot => {
+    if (spot.pays) paysSet.add(spot.pays);
+    if (spot.canton) cantonSet.add(spot.canton);
+    if (spot.ville) villeSet.add(spot.ville);
+  });
+
+  const filterPays = document.getElementById('filter-pays');
+  const filterCanton = document.getElementById('filter-canton');
+  const filterVille = document.getElementById('filter-ville');
+
+  filterPays.innerHTML = '<option value="">Tous</option>';
+  filterCanton.innerHTML = '<option value="">Tous</option>';
+  filterVille.innerHTML = '<option value="">Toutes</option>';
+
+  Array.from(paysSet).sort().forEach(p => {
+    const opt = document.createElement('option'); opt.value = p; opt.textContent = p;
+    filterPays.appendChild(opt);
+  });
+  Array.from(cantonSet).sort().forEach(c => {
+    const opt = document.createElement('option'); opt.value = c; opt.textContent = c;
+    filterCanton.appendChild(opt);
+  });
+  Array.from(villeSet).sort().forEach(v => {
+    const opt = document.createElement('option'); opt.value = v; opt.textContent = v;
+    filterVille.appendChild(opt);
+  });
+}
+
+remplirFiltres();
+
+// --- MARQUEURS ET TRACES ---
+const markers = [];
+const lines = [];
+
+spots.forEach(spot => {
+  const firstCoord = spot.coordinates[0];
+  const marker = L.marker(firstCoord, {
+    icon: L.divIcon({
+      className: 'emoji-marker',
+      html: spot.difficulte === 'bleu' ? '🔵' : spot.difficulte === 'rouge' ? '🔴' : '⚫',
+      iconSize: [24,24]
+    })
+  }).addTo(map);
+
+  const polyline = L.polyline(spot.coordinates, { color: spot.difficulte, weight: 4 });
+
+  marker.on('click', () => {
+    if (map.hasLayer(polyline)) {
+      map.removeLayer(polyline);
+    } else {
+      map.addLayer(polyline);
     }
+  });
 
-    // Couleur selon la difficulté
-    const colorMap = { bleu: '#1E90FF', rouge: '#FF0000', noir: '#000000' };
-    const emojiMap = { bleu: '🔵', rouge: '🔴', noir: '⚫' };
+  const popupContent = `
+    <strong>${spot.nom}</strong><br>
+    Bitume: ${spot.bitume}, Trafic: ${spot.trafic}<br>
+    <a href="${spot.video}" target="_blank">Vidéo</a><br>
+    <a href="${spot.lien}" target="_blank">Point de départ</a>
+  `;
+  marker.bindPopup(popupContent);
 
-    // Création du marqueur
-    const marker = createEmojiMarker(spot.coords[0], colorMap[spot.difficulte], emojiMap[spot.difficulte]);
-    marker.addTo(map);
+  markers.push(marker);
+  lines.push(polyline);
+});
 
-    // Création du tracé
-    const polyline = L.polyline(spot.coords, { color: colorMap[spot.difficulte], weight: 4 });
-    let polyVisible = false;
+// --- APPLICATION DES FILTRES ---
+document.getElementById('apply-filters').addEventListener('click', () => {
+  const pays = document.getElementById('filter-pays').value;
+  const canton = document.getElementById('filter-canton').value;
+  const ville = document.getElementById('filter-ville').value;
+  const difficulte = document.getElementById('filter-difficulte').value;
 
-    // Popup avec infos
-    const popupHTML = `
-        <b>${spot.nom}</b><br>
-        Difficulté: ${spot.difficulte} ${emojiMap[spot.difficulte]}<br>
-        Bitume: ${spot.bitume}/5<br>
-        Trafic: ${spot.trafic}/5<br>
-        <a href="${spot.video}" target="_blank">Vidéo YouTube</a><br>
-        <a href="${spot.lien}" target="_blank">Point de départ Google Maps</a>
-    `;
-    marker.bindPopup(popupHTML);
-
-    // Click pour afficher/cacher le tracé
-    marker.on('click', () => {
-        if (!polyVisible) {
-            polyline.addTo(map);
-            polyVisible = true;
-        } else {
-            map.removeLayer(polyline);
-            polyVisible = false;
-        }
-    });
-
-    // Position en direct sans recentrer la carte
-    if (navigator.geolocation) {
-        navigator.geolocation.watchPosition(
-            (pos) => {
-                const lat = pos.coords.latitude;
-                const lng = pos.coords.longitude;
-                if (!window.userMarker) {
-                    window.userMarker = L.circleMarker([lat, lng], {
-                        radius: 8,
-                        color: 'green',
-                        fillColor: 'green',
-                        fillOpacity: 0.8
-                    }).addTo(map).bindPopup('Votre position');
-                } else {
-                    window.userMarker.setLatLng([lat, lng]);
-                }
-            },
-            (err) => console.warn(err),
-            { enableHighAccuracy: true }
-        );
+  markers.forEach((marker, i) => {
+    const spot = spots[i];
+    const match = (!pays || spot.pays === pays) &&
+                  (!canton || spot.canton === canton) &&
+                  (!ville || spot.ville === ville) &&
+                  (!difficulte || spot.difficulte === difficulte);
+    if (match) marker.addTo(map);
+    else {
+      marker.remove();
+      if (map.hasLayer(lines[i])) map.removeLayer(lines[i]);
     }
+  });
+});
+
 </script>
 </body>
 </html>
-
