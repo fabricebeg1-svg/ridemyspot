@@ -1,0 +1,2 @@
+# ridemyspot
+Freebord Spot Map
