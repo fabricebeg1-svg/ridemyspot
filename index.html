@@ -7,14 +7,16 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <style>
   #map { height: 100vh; }
+
   .marker-bleu { font-size: 24px; color: blue; }
   .marker-rouge { font-size: 24px; color: red; }
   .marker-noir { font-size: 24px; color: black; }
+
   #filterPanel, #addSpotPanel { 
     background: white; 
     padding: 10px; 
     position: absolute; 
-    top: 50px; /* décalage pour ne pas chevaucher les boutons */
+    top: 50px; /* descendu pour ne pas chevaucher les boutons */
     right: 10px; 
     z-index: 1000; 
     border: 1px solid #ccc; 
@@ -22,7 +24,16 @@
     display: none;
     max-width: 250px;
   }
-  .buttonPanel { position: absolute; top: 10px; right: 10px; z-index: 1001; }
+
+  .buttonPanel { 
+    position: absolute; 
+    top: 10px; 
+    right: 10px; 
+    z-index: 1001; 
+    display: flex; 
+    gap: 5px; 
+  }
+
   select, input { width: 100%; margin-bottom: 5px; }
   button { margin-top: 5px; width: 100%; }
 </style>
@@ -119,6 +130,11 @@ function addSpotMarker(spot) {
       iconSize: [24,24]
     })
   }).addTo(map);
+
+  // Polyline créée mais non affichée
+  const polyline = L.polyline(spot.coordinates, { color: spot.difficulte });
+  polylines[spot.nom] = polyline;
+
   marker.bindPopup(`
     <b>${spot.nom}</b><br>
     Bitume: ${spot.bitume}/5<br>
@@ -126,14 +142,15 @@ function addSpotMarker(spot) {
     <a href="${spot.video}" target="_blank">Vidéo</a><br>
     <a href="${spot.lien}" target="_blank">Départ Google Maps</a>
   `);
+
   marker.on('click', () => {
-    if (polylines[spot.nom]) {
-      map.removeLayer(polylines[spot.nom]);
-      delete polylines[spot.nom];
+    if (map.hasLayer(polyline)) {
+      map.removeLayer(polyline);
     } else {
-      polylines[spot.nom] = L.polyline(spot.coordinates, {color: spot.difficulte}).addTo(map);
+      polyline.addTo(map);
     }
   });
+
   markers[spot.nom] = marker;
 }
 
@@ -185,6 +202,7 @@ document.getElementById('applyFilterBtn').addEventListener('click', () => {
   
   spots.forEach(s => {
     const marker = markers[s.nom];
+    const polyline = polylines[s.nom];
     const show = 
       (country === "" || s.pays === country) &&
       (canton === "" || s.canton === canton) &&
@@ -193,12 +211,10 @@ document.getElementById('applyFilterBtn').addEventListener('click', () => {
     
     if(show) {
       marker.addTo(map);
+      if(map.hasLayer(polyline)) polyline.addTo(map);
     } else {
       map.removeLayer(marker);
-      if(polylines[s.nom]) {
-        map.removeLayer(polylines[s.nom]);
-        delete polylines[s.nom];
-      }
+      if(map.hasLayer(polyline)) map.removeLayer(polyline);
     }
   });
 });
