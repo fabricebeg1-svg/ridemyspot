@@ -1,62 +1,118 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <title>Carte Freebord</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <style>
-    #map { height: 100vh; }
-  </style>
+    <meta charset="UTF-8">
+    <title>Carte Freebord</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        #map { height: 100vh; }
+        .emoji-marker {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            color: white;
+            text-align: center;
+            border: 2px solid white;
+        }
+    </style>
 </head>
 <body>
 <div id="map"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  // Création de la carte
-  var map = L.map('map').setView([46.51395, 6.61827], 15);
+    // Initialisation de la carte
+    const map = L.map('map').setView([46.51395, 6.61827], 15);
 
-  // Fond de carte OpenStreetMap
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-  }).addTo(map);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
 
-  // Données spots
-  var spots = [
-    {
-      nom: "Les Bains",
-      difficulte: "rouge",
-      bitume: 4,
-      trafic: 3,
-      coordinates: [
-        [46.51395,6.61827],[46.5139,6.61824],[46.51385,6.61822],[46.51332,6.61796],[46.51232,6.61746],
-        [46.512,6.61732],[46.51192,6.61724],[46.51191,6.61723],[46.51187,6.61719],[46.51185,6.61716],[46.51183,6.61714]
-      ]
+    // Spot “Les Bains”
+    const spot = {
+        nom: "Les Bains",
+        difficulte: "rouge",
+        bitume: 4,
+        trafic: 3,
+        video: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        lien: "https://maps.app.goo.gl/bXnBMYr7HbhJfJEc8",
+        coords: [
+            [46.51395,6.61827],[46.5139,6.61824],[46.51385,6.61822],[46.51332,6.61796],[46.51232,6.61746]
+        ]
+    };
+
+    // Fonction pour créer un marqueur rond avec emoji
+    function createEmojiMarker(latlng, color, emoji) {
+        const icon = L.divIcon({
+            className: 'emoji-marker',
+            html: emoji,
+            iconSize: [32, 32],
+            iconAnchor: [16, 16],
+            popupAnchor: [0, -16],
+            style: `background-color:${color}`
+        });
+        return L.marker(latlng, { icon });
     }
-  ];
 
-  // Objet pour stocker les tracés affichés
-  var polylines = {};
+    // Couleur selon la difficulté
+    const colorMap = { bleu: '#1E90FF', rouge: '#FF0000', noir: '#000000' };
+    const emojiMap = { bleu: '🔵', rouge: '🔴', noir: '⚫' };
 
-  // Ajout des markers
-  spots.forEach(function(spot, index){
-    var marker = L.marker(spot.coordinates[0]).addTo(map);
-    marker.bindPopup(
-      "<b>" + spot.nom + "</b><br>" +
-      "Difficulté: " + spot.difficulte + "<br>" +
-      "Bitume: " + spot.bitume + "<br>" +
-      "Trafic: " + spot.trafic
-    );
+    // Création du marqueur
+    const marker = createEmojiMarker(spot.coords[0], colorMap[spot.difficulte], emojiMap[spot.difficulte]);
+    marker.addTo(map);
 
-    // Gestion clic pour afficher/masquer le tracé
-    marker.on('click', function(){
-      if(polylines[index]){
-        map.removeLayer(polylines[index]); // Supprime le tracé si déjà affiché
-        delete polylines[index];
-      } else {
-        polylines[index] = L.polyline(spot.coordinates, {color: spot.difficulte}).addTo(map);
-      }
+    // Création du tracé
+    const polyline = L.polyline(spot.coords, { color: colorMap[spot.difficulte], weight: 4 });
+    let polyVisible = false;
+
+    // Popup avec infos
+    const popupHTML = `
+        <b>${spot.nom}</b><br>
+        Difficulté: ${spot.difficulte} ${emojiMap[spot.difficulte]}<br>
+        Bitume: ${spot.bitume}/5<br>
+        Trafic: ${spot.trafic}/5<br>
+        <a href="${spot.video}" target="_blank">Vidéo YouTube</a><br>
+        <a href="${spot.lien}" target="_blank">Point de départ Google Maps</a>
+    `;
+    marker.bindPopup(popupHTML);
+
+    // Click pour afficher/cacher le tracé
+    marker.on('click', () => {
+        if (!polyVisible) {
+            polyline.addTo(map);
+            polyVisible = true;
+        } else {
+            map.removeLayer(polyline);
+            polyVisible = false;
+        }
     });
-  });
+
+    // Position en direct sans recentrer la carte
+    if (navigator.geolocation) {
+        navigator.geolocation.watchPosition(
+            (pos) => {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+                if (!window.userMarker) {
+                    window.userMarker = L.circleMarker([lat, lng], {
+                        radius: 8,
+                        color: 'green',
+                        fillColor: 'green',
+                        fillOpacity: 0.8
+                    }).addTo(map).bindPopup('Votre position');
+                } else {
+                    window.userMarker.setLatLng([lat, lng]);
+                }
+            },
+            (err) => console.warn(err),
+            { enableHighAccuracy: true }
+        );
+    }
 </script>
 </body>
 </html>
