@@ -3,29 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Carte Freebord</title>
+  <title>Carte Freebord - Les Bains</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
     #map { height: 100vh; }
-    .emoji-marker {
-      font-size: 24px;
-      line-height: 24px;
-      text-align: center;
+    .emoji-marker { font-size: 24px; line-height: 24px; text-align: center; }
+    .leaflet-popup-content { font-size: 14px; }
+    #helpButton {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+      background: white;
+      border: 1px solid #ccc;
+      padding: 5px 10px;
+      cursor: pointer;
     }
-    .leaflet-popup-content {
-      font-size: 14px;
+    #filters {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 1000;
+      background: white;
+      border: 1px solid #ccc;
+      padding: 5px 10px;
     }
   </style>
 </head>
 <body>
+  <div id="filters">
+    <label><input type="checkbox" id="showBlue" checked> Bleu</label>
+    <label><input type="checkbox" id="showRed" checked> Rouge</label>
+    <label><input type="checkbox" id="showBlack" checked> Noir</label>
+  </div>
+  <div id="helpButton">Help</div>
   <div id="map"></div>
+
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    // Fonction emojis pour bitume et trafic
+    // Emojis
     function getStars(nb) { return '⭐'.repeat(nb); }
     function getCars(nb) { return '🚗'.repeat(nb); }
 
-    // Liste des spots
+    // Spot unique
     var spots = [
       {
         nom: "Les Bains",
@@ -41,115 +61,9 @@
           [46.51232,6.61746],[46.512,6.61732],[46.51192,6.61724],[46.51191,6.61723],
           [46.51187,6.61719],[46.51185,6.61716],[46.51183,6.61714]
         ]
-      },
-      {
-        nom: "Montolivet",
-        lat: 46.514071,
-        lng: 6.639553,
-        difficulte: "noir",
-        bitume: 3,
-        trafic: 1,
-        video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-        lien: "https://maps.app.goo.gl/4pbtwV3fMCweqjh5A",
-        polyline: [
-          [46.5140863,6.6395701],[46.5139238,6.6395057],[46.5133221,6.6394252],
-          [46.5130747,6.6393823],[46.5127831,6.6393233],[46.5124914,6.6392804]
-        ]
-      },
-      {
-        nom: "Derrière les hôpitaux",
-        lat: 46.530979,
-        lng: 6.646186,
-        difficulte: "bleu",
-        bitume: 3,
-        trafic: 2,
-        video: "https://www.youtube.com/embed/ysz5S6PUM-U",
-        lien: "https://maps.app.goo.gl/ZR52JcWtqaUND34k9",
-        polyline: [
-          [46.5310463,6.6461827],[46.5300129,6.6461398],[46.5291641,6.6454854],[46.5284481,6.6452493],
-          [46.5276288,6.6451635],[46.5262174,6.6449648],[46.5250363,6.645351],[46.5237519,6.6454369],
-          [46.5223493,6.6460806],[46.5217439,6.6464668]
-        ]
-      },
-      {
-        nom: "Les Poulets",
-        lat: 46.531547,
-        lng: 6.675879,
-        difficulte: "noir",
-        bitume: 5,
-        trafic: 2,
-        video: "https://www.youtube.com/watch?v=KU7fv4SWRQU",
-        lien: "https://maps.app.goo.gl/UGEmvP7WUGthtcgr6",
-        polyline: [
-          [46.53165,6.67598],[46.53152,6.67581],[46.53145,6.6757],[46.53143,6.67567],[46.53139,6.67562],[46.5313,6.67549],
-          [46.53126,6.67544],[46.53118,6.67532],[46.53114,6.67527],[46.53109,6.67524],[46.53103,6.67521],[46.53099,6.6752],
-          [46.53094,6.67518],[46.53081,6.67516],[46.53078,6.67515],[46.53062,6.6751],[46.53048,6.67507],[46.53043,6.67508],
-          [46.53037,6.67509],[46.53028,6.67512],[46.53025,6.67514],[46.53001,6.67522],[46.5299,6.67525],[46.52982,6.67527],
-          [46.52978,6.67526],[46.52976,6.67524],[46.52975,6.67521],[46.52972,6.67515],[46.52968,6.67505],[46.52963,6.67496],
-          [46.52962,6.67494],[46.52957,6.67489],[46.52952,6.67487],[46.52949,6.67487],[46.52947,6.67487],[46.5294,6.67489],
-          [46.52934,6.67493],[46.52928,6.67499],[46.52918,6.6751],[46.52916,6.67511],[46.52904,6.67521],[46.529,6.67524],
-          [46.52893,6.67528],[46.52887,6.67529],[46.52883,6.67528],[46.52877,6.67524],[46.52871,6.67518],[46.52866,6.67513],
-          [46.5286,6.67505],[46.52854,6.67496],[46.52851,6.67488],[46.52845,6.67474],[46.52841,6.67462],[46.52834,6.67451],
-          [46.52823,6.67436],[46.52822,6.67435],[46.52807,6.6742],[46.52804,6.67418],[46.52791,6.67407],[46.52779,6.67398],
-          [46.52763,6.67385],[46.5276,6.67382],[46.5275,6.67372],[46.52745,6.67367],[46.52726,6.67345],[46.52717,6.67334],
-          [46.52712,6.67328],[46.52709,6.67323]
-        ]
-      },
-      // Nouveau spot Fribourg : Canyon
-      {
-        nom: "Canyon",
-        lat: 46.7860597,
-        lng: 7.1261238,
-        difficulte: "bleu",
-        bitume: 4,
-        trafic: 1,
-        video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-        lien: "https://maps.app.goo.gl/GDVLAGQZjDzfKaK46",
-        polyline: [
-          [46.78605,7.12614],[46.78606,7.12605],[46.78606,7.12597],[46.78606,7.12591],
-          [46.78606,7.12577],[46.78606,7.12571],[46.78606,7.1256],[46.78604,7.12545],
-          [46.78604,7.12542],[46.78601,7.12524],[46.78596,7.12501],[46.78587,7.12466],
-          [46.7858,7.12442],[46.78578,7.12434],[46.78577,7.12427],[46.78576,7.12422],
-          [46.78573,7.12394],[46.78571,7.12358],[46.78569,7.1229],[46.78569,7.12284],
-          [46.78569,7.12264],[46.7857,7.12235],[46.7857,7.12185],[46.7857,7.12168],
-          [46.78569,7.12161],[46.78565,7.12131],[46.78561,7.12111],[46.78561,7.1211],
-          [46.78561,7.12109],[46.7856,7.12103],[46.78558,7.12085],[46.78553,7.12052],
-          [46.7855,7.12033],[46.78549,7.12028],[46.78546,7.12009],[46.78544,7.12001],
-          [46.7854,7.11982],[46.7854,7.11977],[46.78537,7.11958],[46.78532,7.11938],
-          [46.78519,7.11884],[46.78517,7.11876],[46.78513,7.11858],[46.78512,7.11855],
-          [46.78511,7.11851],[46.78508,7.11832],[46.78508,7.11825],[46.78507,7.11819],
-          [46.78506,7.11813],[46.78505,7.11807],[46.78501,7.11781],[46.785,7.11773],
-          [46.78492,7.11724],[46.78488,7.11705],[46.78487,7.11702],[46.78484,7.11688],
-          [46.78476,7.11673]
-        ]
-      },
-      // Nouveau spot Fribourg : La Côte
-      {
-        nom: "La Côte",
-        lat: 46.739693,
-        lng: 7.079561,
-        difficulte: "bleu",
-        bitume: 4,
-        trafic: 1,
-        video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-        lien: "https://maps.app.goo.gl/te7s9HRrVtx6AWxY8",
-        polyline: [
-          [46.73931,7.07946],[46.73921,7.07942],[46.73855,7.07924],[46.73839,7.0792],
-          [46.73828,7.07917],[46.73821,7.07915],[46.73786,7.07905],[46.73781,7.07904],
-          [46.73771,7.07901],[46.73768,7.079],[46.73755,7.07897],[46.7375,7.07896],
-          [46.73737,7.07893],[46.73718,7.07892],[46.73708,7.07891],[46.73696,7.07892],
-          [46.73685,7.07892],[46.73679,7.07892],[46.73678,7.07892],[46.73631,7.07895],
-          [46.73599,7.07897],[46.73589,7.07898],[46.73579,7.07897],[46.7357,7.07895],
-          [46.7356,7.07893],[46.73551,7.07891],[46.7354,7.07891],[46.73526,7.07893],
-          [46.73513,7.07894],[46.73504,7.07893],[46.73495,7.07888],[46.73486,7.0788],
-          [46.73479,7.07868],[46.7347,7.07844],[46.73457,7.07789],[46.73456,7.07786],
-          [46.7345,7.07765],[46.73447,7.07755],[46.73441,7.07742],[46.73437,7.07732],
-          [46.73428,7.07709],[46.73424,7.07702]
-        ]
       }
     ];
 
-    // Ajuster la carte pour englober tous les spots
     var map = L.map('map');
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
@@ -157,47 +71,76 @@
     }).addTo(map);
 
     var bounds = [];
-    spots.forEach(function(s) { bounds.push([s.lat, s.lng]); });
+    spots.forEach(s => bounds.push([s.lat, s.lng]));
     map.fitBounds(bounds);
 
     var activePolylines = new Map();
+    var markers = [];
 
-    spots.forEach(function(spot) {
-      var emoji = spot.difficulte === "bleu" ? "🔵" : spot.difficulte === "rouge" ? "🔴" : "⚫";
+    function drawMarkers() {
+      // Supprime tous les markers existants
+      markers.forEach(m => map.removeLayer(m));
+      markers = [];
 
-      var marker = L.marker([spot.lat, spot.lng], {
-        icon: L.divIcon({
-          html: emoji,
-          className: "emoji-marker",
-          iconSize: [30, 30],
-          iconAnchor: [15, 15]
-        })
-      }).addTo(map);
+      // Filtrage
+      var showBlue = document.getElementById('showBlue').checked;
+      var showRed = document.getElementById('showRed').checked;
+      var showBlack = document.getElementById('showBlack').checked;
 
-      var popupContent = `
-        <b>${spot.nom}</b><br>
-        Bitume: ${getStars(spot.bitume)}<br>
-        Trafic: ${getCars(spot.trafic)}<br>
-        <a href="${spot.lien}" target="_blank">Point de départ</a><br>
-        <iframe width="200" height="113" src="${spot.video}" frameborder="0" allowfullscreen></iframe>
-      `;
-      marker.bindPopup(popupContent);
+      spots.forEach(spot => {
+        if ((spot.difficulte === 'bleu' && !showBlue) ||
+            (spot.difficulte === 'rouge' && !showRed) ||
+            (spot.difficulte === 'noir' && !showBlack)) return;
 
-      marker.on('mouseover', function() {
-        if (!L.Browser.mobile) marker.openPopup();
+        var emoji = spot.difficulte === "bleu" ? "🔵" : spot.difficulte === "rouge" ? "🔴" : "⚫";
+
+        var marker = L.marker([spot.lat, spot.lng], {
+          icon: L.divIcon({
+            html: emoji,
+            className: "emoji-marker",
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
+          })
+        }).addTo(map);
+
+        var popupContent = `
+          <b>${spot.nom}</b><br>
+          Bitume: ${getStars(spot.bitume)}<br>
+          Trafic: ${getCars(spot.trafic)}<br>
+          <a href="${spot.lien}" target="_blank">Point de départ</a><br>
+          <iframe width="200" height="113" src="${spot.video}" frameborder="0" allowfullscreen></iframe>
+        `;
+        marker.bindPopup(popupContent);
+
+        marker.on('mouseover', function() { if (!L.Browser.mobile) marker.openPopup(); });
+
+        marker.on('click', function() {
+          if (activePolylines.has(spot.nom)) {
+            map.removeLayer(activePolylines.get(spot.nom));
+            activePolylines.delete(spot.nom);
+          } else {
+            var color = spot.difficulte === "bleu" ? "#007bff" : spot.difficulte === "rouge" ? "#ff0000" : "#000000";
+            var polyline = L.polyline(spot.polyline, {color: color, weight: 4}).addTo(map);
+            activePolylines.set(spot.nom, polyline);
+          }
+        });
+
+        markers.push(marker);
       });
+    }
 
-      marker.on('click', function() {
-        if (activePolylines.has(spot.nom)) {
-          map.removeLayer(activePolylines.get(spot.nom));
-          activePolylines.delete(spot.nom);
-        } else {
-          var color = spot.difficulte === "bleu" ? "#007bff" : spot.difficulte === "rouge" ? "#ff0000" : "#000000";
-          var polyline = L.polyline(spot.polyline, {color: color, weight: 4}).addTo(map);
-          activePolylines.set(spot.nom, polyline);
-        }
-      });
+    drawMarkers();
+
+    // Gestion des filtres
+    document.getElementById('showBlue').addEventListener('change', drawMarkers);
+    document.getElementById('showRed').addEventListener('change', drawMarkers);
+    document.getElementById('showBlack').addEventListener('change', drawMarkers);
+
+    // Bouton Help
+    document.getElementById('helpButton').addEventListener('click', () => {
+      alert("Cliquez sur un emoji pour afficher la polyline du spot.\nUtilisez les filtres pour masquer/afficher certains niveaux de difficulté.");
     });
+
   </script>
 </body>
 </html>
