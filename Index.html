@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Carte Freebord - Lausanne & Fribourg</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    html,body,#map{height:100%;margin:0;padding:0}
+    #map{height:100vh;}
+    .emoji-marker{ font-size:24px; line-height:24px; text-align:center; }
+    .leaflet-popup-content { font-size:14px; }
+    @media (max-width:768px){ .emoji-marker{ font-size:28px; } }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+  // ---------- Helpers ----------
+  function getStars(n){ return '⭐'.repeat(n); }
+  function getCars(n){ return '🚗'.repeat(n); }
+  function emojiForDiff(d){
+    d = (d||'').toString().toLowerCase();
+    if(d==='bleu') return '🔵';
+    if(d==='rouge') return '🔴';
+    if(d==='noir') return '⚫';
+    return '⚪';
+  }
+  function colorForDiff(d){
+    d = (d||'').toString().toLowerCase();
+    if(d==='bleu') return '#007bff';
+    if(d==='rouge') return '#ff0000';
+    if(d==='noir') return '#000000';
+    return '#666666';
+  }
+
+  // ---------- Map ----------
+  var map = L.map('map').setView([46.521,6.64], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    maxZoom:19
+  }).addTo(map);
+
+  // ---------- Load Spots from GeoJSON ----------
+  fetch('spots.geojson')
+    .then(res => res.json())
+    .then(data => {
+      data.features.forEach(s => {
+        const [lng, lat] = s.geometry.coordinates;
+        const props = s.properties;
+
+        var marker = L.marker([lat, lng], {
+          icon: L.divIcon({className:'emoji-marker', html:emojiForDiff(props.difficulte)})
+        }).addTo(map);
+
+        marker.bindPopup(`
+          <b>${props.nom}</b><br/>
+          Difficulté: ${props.difficulte}<br/>
+          Bitume: ${getStars(props.bitume)}<br/>
+          Trafic: ${getCars(props.trafic)}<br/>
+          <a href="${props.lien}" target="_blank">Google Maps</a><br/>
+          <iframe width="200" height="113" src="${props.video}" frameborder="0" allowfullscreen></iframe>
+        `);
+
+        if(props.polyline){
+          var poly = L.polyline(props.polyline,{color:colorForDiff(props.difficulte),weight:4,opacity:0.7}).addTo(map);
+        }
+      });
+    })
+    .catch(err => console.error("Erreur chargement GeoJSON:", err));
+
+  // ---------- Geolocation ----------
+  var gpsMarker;
+  if (navigator.geolocation){
+    navigator.geolocation.watchPosition(
+      function(pos){
+        var latlng = [pos.coords.latitude,pos.coords.longitude];
+        if(!gpsMarker){
+          gpsMarker = L.marker(latlng,{icon:L.divIcon({className:'emoji-marker',html:'📍'})}).addTo(map);
+        } else { gpsMarker.setLatLng(latlng); }
+        map.panTo(latlng);
+      },
+      function(err){ console.warn('Erreur GPS:',err); },
+      {enableHighAccuracy:true, maximumAge:1000, timeout:10000}
+    );
+  } else { alert("La géolocalisation n'est pas supportée par ce navigateur."); }
+</script>
+</body>
+</html>
