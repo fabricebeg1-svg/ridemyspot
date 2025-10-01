@@ -69,7 +69,7 @@
 <script>
 
 // --- Initialisation de la carte ---
-const map = L.map('map').setView([46.5191, 6.5668], 13); // centrée sur Lausanne par défaut
+const map = L.map('map').setView([46.5191, 6.5668], 13);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
@@ -95,6 +95,7 @@ const spots = [
 
 const polylines = {};
 const markers = {};
+const couleurMap = { bleu: "blue", rouge: "red", noir: "black" };
 
 // --- Fonction pour créer un marker avec pop-up ---
 function addSpotMarker(spot) {
@@ -118,7 +119,7 @@ function addSpotMarker(spot) {
       map.removeLayer(polylines[spot.nom]);
       delete polylines[spot.nom];
     } else {
-      polylines[spot.nom] = L.polyline(spot.coordinates, {color: spot.difficulte}).addTo(map);
+      polylines[spot.nom] = L.polyline(spot.coordinates, {color: couleurMap[spot.difficulte]}).addTo(map);
     }
   });
   markers[spot.nom] = marker;
@@ -157,6 +158,5 @@ document.getElementById('spotSendBtn').addEventListener('click', () => {
 });
 
 </script>
-
 </body>
 </html>
