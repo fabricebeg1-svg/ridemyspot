@@ -297,6 +297,23 @@
 
     spots.forEach(addSpotMarker);
 
+    // --- Centrer la carte sur tous les spots ---
+const allCoords = [];
+spots.forEach(s => {
+  if (s.coordinates && s.coordinates.length > 0) {
+    allCoords.push(...s.coordinates);
+  } else if (s.polyline && s.polyline.length > 0) {
+    allCoords.push(...s.polyline);
+  } else if (s.lat && s.lng) {
+    allCoords.push([s.lat, s.lng]);
+  }
+});
+
+if (allCoords.length > 0) {
+  map.fitBounds(allCoords);
+}
+
+
     // --- Boutons ---
     const filterPanel = document.getElementById('filterPanel');
     const addSpotPanel = document.getElementById('addSpotPanel');
@@ -366,5 +383,6 @@
   </script>
 </body>
 </html>
+
 
 
