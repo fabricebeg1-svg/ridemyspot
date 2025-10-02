@@ -313,6 +313,18 @@ if (allCoords.length > 0) {
   map.fitBounds(allCoords);
 }
 
+    // --- Localisation en temps réel ---
+map.locate({ setView: false, watch: true, maxZoom: 16 });
+
+const userMarker = L.marker([0,0], {
+  icon: L.divIcon({ className: 'emoji-marker', html: "📍", iconSize: [24,24] })
+}).addTo(map);
+
+map.on("locationfound", e => {
+  userMarker.setLatLng(e.latlng);
+});
+
+
 
     // --- Boutons ---
     const filterPanel = document.getElementById('filterPanel');
@@ -383,6 +395,7 @@ if (allCoords.length > 0) {
   </script>
 </body>
 </html>
+
 
 
 
