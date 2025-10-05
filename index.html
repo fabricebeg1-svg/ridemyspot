@@ -1111,32 +1111,29 @@ populateFilters();
 
 // --- Application des filtres ---
 document.getElementById('applyFilterBtn').addEventListener('click', () => {
-  const country = document.getElementById('filterCountry').value.trim().toLowerCase();
-  const canton = document.getElementById('filterCanton').value.trim().toLowerCase();
-  const city = document.getElementById('filterCity').value.trim().toLowerCase();
-  const difficulty = document.getElementById('filterDifficulty').value.trim().toLowerCase();
-  const nameFilter = document.getElementById('filterName').value.trim().toLowerCase();
+  const country = document.getElementById('filterCountry').value;
+  const canton = document.getElementById('filterCanton').value;
+  const city = document.getElementById('filterCity').value;
+  const difficulty = document.getElementById('filterDifficulty').value;
+  const nameFilter = document.getElementById('filterName').value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
   spots.forEach(s => {
     const marker = markers[s.nom];
-
-    const match =
-      (country === "" || s.pays.toLowerCase() === country) &&
-      (canton === "" || s.canton.toLowerCase() === canton) &&
-      (city === "" || s.ville.toLowerCase() === city) &&
-      (difficulty === "" || s.difficulte.toLowerCase() === difficulty) &&
-      (nameFilter === "" || s.nom.toLowerCase().includes(nameFilter));
-
-    if (match) {
-      marker.addTo(map);
-    } else {
+    const spotNameNormalized = s.nom.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    
+    const show = (country === "" || s.pays === country) &&
+                 (canton === "" || s.canton === canton) &&
+                 (city === "" || s.ville === city) &&
+                 (difficulty === "" || s.difficulte === difficulty) &&
+                 (nameFilter === "" || spotNameNormalized.includes(nameFilter));
+    
+    if(show) marker.addTo(map);
+    else {
       map.removeLayer(marker);
-      if (polylines[s.nom]) {
-        map.removeLayer(polylines[s.nom]);
-        delete polylines[s.nom];
-      }
+      if(polylines[s.nom]) { map.removeLayer(polylines[s.nom]); delete polylines[s.nom]; }
     }
   });
+});
 
   // Ferme le panneau de filtres automatiquement après application
   document.getElementById('filterPanel').style.display = 'none';
@@ -1162,6 +1159,7 @@ document.getElementById('applyFilterBtn').addEventListener('click', () => {
   </script>
 </body>
 </html>
+
 
 
 
