@@ -1116,17 +1116,29 @@ document.getElementById('applyFilterBtn').addEventListener('click', () => {
   const canton = document.getElementById('filterCanton').value.trim().toLowerCase();
   const city = document.getElementById('filterCity').value.trim().toLowerCase();
   const difficulty = document.getElementById('filterDifficulty').value.trim().toLowerCase();
-  const nameFilter = document.getElementById('filterName').value.trim().toLowerCase();
+
+  // Normalisation pour les accents et majuscules
+  const nameFilter = document.getElementById('filterName').value
+                        .trim()
+                        .toLowerCase()
+                        .normalize("NFD")
+                        .replace(/[\u0300-\u036f]/g, "");
 
   spots.forEach(s => {
     const marker = markers[s.nom];
+
+    // Normalisation du nom du spot
+    const spotNameNormalized = s.nom
+                                .toLowerCase()
+                                .normalize("NFD")
+                                .replace(/[\u0300-\u036f]/g, "");
 
     const match =
       (country === "" || s.pays.toLowerCase() === country) &&
       (canton === "" || s.canton.toLowerCase() === canton) &&
       (city === "" || s.ville.toLowerCase() === city) &&
       (difficulty === "" || s.difficulte.toLowerCase() === difficulty) &&
-      (nameFilter === "" || s.nom.toLowerCase().includes(nameFilter));
+      (nameFilter === "" || spotNameNormalized.includes(nameFilter));
 
     if (match) {
       marker.addTo(map);
@@ -1142,6 +1154,7 @@ document.getElementById('applyFilterBtn').addEventListener('click', () => {
   // Ferme le panneau de filtres automatiquement après application
   document.getElementById('filterPanel').style.display = 'none';
 });
+
 
 
     // --- Envoyer un spot ---
@@ -1163,6 +1176,7 @@ document.getElementById('applyFilterBtn').addEventListener('click', () => {
   </script>
 </body>
 </html>
+
 
 
 
