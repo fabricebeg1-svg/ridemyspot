@@ -1070,38 +1070,27 @@ map.on("locationfound", e => {
     });
 
     // --- Filtres dynamiques ---
-    function populateFilters() {
-      const countrySet = new Set();
-      const cantonSet = new Set();
-      const citySet = new Set();
-      spots.forEach(s => { countrySet.add(s.pays); cantonSet.add(s.canton); citySet.add(s.ville); });
+  document.getElementById('applyFilterBtn').addEventListener('click', () => {
+  const selectedCountry = document.getElementById('filterCountry').value.trim().toLowerCase();
+  const selectedCanton = document.getElementById('filterCanton').value.trim().toLowerCase();
+  const selectedCity = document.getElementById('filterCity').value.trim().toLowerCase();
+  const selectedDifficulty = document.getElementById('filterDifficulty').value.trim().toLowerCase();
+  const searchName = document.getElementById('filterName').value.trim().toLowerCase();
 
-      const fc = document.getElementById('filterCountry');
-      const fct = document.getElementById('filterCanton');
-      const fci = document.getElementById('filterCity');
+  markers.forEach(marker => {
+    const match =
+      (selectedCountry === '' || marker.country.toLowerCase() === selectedCountry) &&
+      (selectedCanton === '' || marker.canton.toLowerCase() === selectedCanton) &&
+      (selectedCity === '' || marker.city.toLowerCase() === selectedCity) &&
+      (selectedDifficulty === '' || marker.difficulty.toLowerCase() === selectedDifficulty) &&
+      (searchName === '' || marker.title.toLowerCase().includes(searchName));
 
-      countrySet.forEach(c => { const o=document.createElement('option'); o.value=c;o.text=c; fc.add(o); });
-      cantonSet.forEach(c => { const o=document.createElement('option'); o.value=c;o.text=c; fct.add(o); });
-      citySet.forEach(c => { const o=document.createElement('option'); o.value=c;o.text=c; fci.add(o); });
-    }
-    populateFilters();
+    marker.setVisible(match);
+  });
 
-    document.getElementById('applyFilterBtn').addEventListener('click', () => {
-      const country = document.getElementById('filterCountry').value;
-      const canton = document.getElementById('filterCanton').value;
-      const city = document.getElementById('filterCity').value;
-      const difficulty = document.getElementById('filterDifficulty').value;
-
-      spots.forEach(s => {
-        const marker = markers[s.nom];
-        const show = (country === "" || s.pays === country) &&
-                     (canton === "" || s.canton === canton) &&
-                     (city === "" || s.ville === city) &&
-                     (difficulty === "" || s.difficulte === difficulty);
-        if(show) marker.addTo(map);
-        else { map.removeLayer(marker); if(polylines[s.nom]) { map.removeLayer(polylines[s.nom]); delete polylines[s.nom]; } }
-      });
-    });
+  // Ferme automatiquement le panneau après l’application du filtre
+  document.getElementById('filterPanel').style.display = 'none';
+});
 
     // --- Envoyer un spot ---
     document.getElementById('spotSendBtn').addEventListener('click', () => {
@@ -1122,6 +1111,7 @@ map.on("locationfound", e => {
   </script>
 </body>
 </html>
+
 
 
 
