@@ -73,10 +73,6 @@
         <option value="noir">Difficile</option>
       </select>
     </label>
-    <label>Nom du spot :
-  <input type="text" id="filterName" placeholder="ex: Béthusy ou bethusy">
-</label>
-
     <button id="applyFilterBtn">Appliquer</button>
   </div>
 
@@ -1070,88 +1066,38 @@ map.on("locationfound", e => {
     });
 
     // --- Filtres dynamiques ---
-function populateFilters() {
-  const countrySet = new Set();
-  const cantonSet = new Set();
-  const citySet = new Set();
+    function populateFilters() {
+      const countrySet = new Set();
+      const cantonSet = new Set();
+      const citySet = new Set();
+      spots.forEach(s => { countrySet.add(s.pays); cantonSet.add(s.canton); citySet.add(s.ville); });
 
-  spots.forEach(s => {
-    countrySet.add(s.pays);
-    cantonSet.add(s.canton);
-    citySet.add(s.ville);
-  });
+      const fc = document.getElementById('filterCountry');
+      const fct = document.getElementById('filterCanton');
+      const fci = document.getElementById('filterCity');
 
-  const fc = document.getElementById('filterCountry');
-  const fct = document.getElementById('filterCanton');
-  const fci = document.getElementById('filterCity');
-
-  countrySet.forEach(c => {
-    const o = document.createElement('option');
-    o.value = c;
-    o.text = c;
-    fc.add(o);
-  });
-
-  cantonSet.forEach(c => {
-    const o = document.createElement('option');
-    o.value = c;
-    o.text = c;
-    fct.add(o);
-  });
-
-  citySet.forEach(c => {
-    const o = document.createElement('option');
-    o.value = c;
-    o.text = c;
-    fci.add(o);
-  });
-}
-
-populateFilters();
-
-// --- Application des filtres ---
-document.getElementById('applyFilterBtn').addEventListener('click', () => {
-  const country = document.getElementById('filterCountry').value;
-  const canton = document.getElementById('filterCanton').value;
-  const city = document.getElementById('filterCity').value;
-  const difficulty = document.getElementById('filterDifficulty').value;
-  const nameFilter = normalizeString(document.getElementById('filterName').value);
-
-  spots.forEach(s => {
-    const marker = markers[s.nom];
-    if (!marker) return; // sécurité si le marker n'existe pas
-
-    const spotNameNormalized = normalizeString(s.nom);
-
-    const show =
-      (country === "" || s.pays === country) &&
-      (canton === "" || s.canton === canton) &&
-      (city === "" || s.ville === city) &&
-      (difficulty === "" || s.difficulte === difficulty) &&
-      (nameFilter === "" || spotNameNormalized.includes(nameFilter));
-
-    if (show) {
-      marker.addTo(map);
-    } else {
-      map.removeLayer(marker);
-      if (polylines[s.nom]) {
-        map.removeLayer(polylines[s.nom]);
-        delete polylines[s.nom];
-      }
+      countrySet.forEach(c => { const o=document.createElement('option'); o.value=c;o.text=c; fc.add(o); });
+      cantonSet.forEach(c => { const o=document.createElement('option'); o.value=c;o.text=c; fct.add(o); });
+      citySet.forEach(c => { const o=document.createElement('option'); o.value=c;o.text=c; fci.add(o); });
     }
-  });
-});
+    populateFilters();
 
-// fonction utilitaire pour normaliser les chaînes
-function normalizeString(str) {
-  return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-}
+    document.getElementById('applyFilterBtn').addEventListener('click', () => {
+      const country = document.getElementById('filterCountry').value;
+      const canton = document.getElementById('filterCanton').value;
+      const city = document.getElementById('filterCity').value;
+      const difficulty = document.getElementById('filterDifficulty').value;
 
-
-  // Ferme le panneau de filtres automatiquement après application
-  document.getElementById('filterPanel').style.display = 'none';
-});
-
+      spots.forEach(s => {
+        const marker = markers[s.nom];
+        const show = (country === "" || s.pays === country) &&
+                     (canton === "" || s.canton === canton) &&
+                     (city === "" || s.ville === city) &&
+                     (difficulty === "" || s.difficulte === difficulty);
+        if(show) marker.addTo(map);
+        else { map.removeLayer(marker); if(polylines[s.nom]) { map.removeLayer(polylines[s.nom]); delete polylines[s.nom]; } }
+      });
+    });
 
     // --- Envoyer un spot ---
     document.getElementById('spotSendBtn').addEventListener('click', () => {
@@ -1172,11 +1118,6 @@ function normalizeString(str) {
   </script>
 </body>
 </html>
-
-
-
-
-
 
 
 
