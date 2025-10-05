@@ -1115,25 +1115,38 @@ document.getElementById('applyFilterBtn').addEventListener('click', () => {
   const canton = document.getElementById('filterCanton').value;
   const city = document.getElementById('filterCity').value;
   const difficulty = document.getElementById('filterDifficulty').value;
-  const nameFilter = document.getElementById('filterName').value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const nameFilter = normalizeString(document.getElementById('filterName').value);
 
   spots.forEach(s => {
     const marker = markers[s.nom];
-    const spotNameNormalized = s.nom.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    
-    const show = (country === "" || s.pays === country) &&
-                 (canton === "" || s.canton === canton) &&
-                 (city === "" || s.ville === city) &&
-                 (difficulty === "" || s.difficulte === difficulty) &&
-                 (nameFilter === "" || spotNameNormalized.includes(nameFilter));
-    
-    if(show) marker.addTo(map);
-    else {
+    if (!marker) return; // sécurité si le marker n'existe pas
+
+    const spotNameNormalized = normalizeString(s.nom);
+
+    const show =
+      (country === "" || s.pays === country) &&
+      (canton === "" || s.canton === canton) &&
+      (city === "" || s.ville === city) &&
+      (difficulty === "" || s.difficulte === difficulty) &&
+      (nameFilter === "" || spotNameNormalized.includes(nameFilter));
+
+    if (show) {
+      marker.addTo(map);
+    } else {
       map.removeLayer(marker);
-      if(polylines[s.nom]) { map.removeLayer(polylines[s.nom]); delete polylines[s.nom]; }
+      if (polylines[s.nom]) {
+        map.removeLayer(polylines[s.nom]);
+        delete polylines[s.nom];
+      }
     }
   });
 });
+
+// fonction utilitaire pour normaliser les chaînes
+function normalizeString(str) {
+  return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
 
   // Ferme le panneau de filtres automatiquement après application
   document.getElementById('filterPanel').style.display = 'none';
@@ -1159,6 +1172,7 @@ document.getElementById('applyFilterBtn').addEventListener('click', () => {
   </script>
 </body>
 </html>
+
 
 
 
