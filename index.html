@@ -73,13 +73,7 @@
         <option value="noir">Difficile</option>
       </select>
     </label>
-    <label>Nom du spot :
-  <input type="text" id="filterName" placeholder="ex: Béthusy ou bethusy">
-</label>
-
-    <button type="submit">Appliquer</button>
-<button type="button" id="resetBtn">Réinitialiser</button>
-
+    <button id="applyFilterBtn">Appliquer</button>
   </div>
 
   <div id="addSpotPanel">
@@ -1072,95 +1066,38 @@ map.on("locationfound", e => {
     });
 
     // --- Filtres dynamiques ---
-function populateFilters() {
-  const countrySet = new Set();
-  const cantonSet = new Set();
-  const citySet = new Set();
+    function populateFilters() {
+      const countrySet = new Set();
+      const cantonSet = new Set();
+      const citySet = new Set();
+      spots.forEach(s => { countrySet.add(s.pays); cantonSet.add(s.canton); citySet.add(s.ville); });
 
-  spots.forEach(s => {
-    countrySet.add(s.pays);
-    cantonSet.add(s.canton);
-    citySet.add(s.ville);
-  });
+      const fc = document.getElementById('filterCountry');
+      const fct = document.getElementById('filterCanton');
+      const fci = document.getElementById('filterCity');
 
-  const fc = document.getElementById('filterCountry');
-  const fct = document.getElementById('filterCanton');
-  const fci = document.getElementById('filterCity');
-
-  countrySet.forEach(c => {
-    const o = document.createElement('option');
-    o.value = c;
-    o.text = c;
-    fc.add(o);
-  });
-
-  cantonSet.forEach(c => {
-    const o = document.createElement('option');
-    o.value = c;
-    o.text = c;
-    fct.add(o);
-  });
-
-  citySet.forEach(c => {
-    const o = document.createElement('option');
-    o.value = c;
-    o.text = c;
-    fci.add(o);
-  });
-}
-
-populateFilters();
-
-// --- Application des filtres ---
-document.getElementById('applyFilterBtn').addEventListener('click', () => {
-  const country = document.getElementById('filterCountry').value.trim().toLowerCase();
-  const canton = document.getElementById('filterCanton').value.trim().toLowerCase();
-  const city = document.getElementById('filterCity').value.trim().toLowerCase();
-  const difficulty = document.getElementById('filterDifficulty').value.trim().toLowerCase();
-
-  // Normalisation pour les accents et majuscules
-  const nameFilter = document.getElementById('filterName').value
-                        .trim()
-                        .toLowerCase()
-                        .normalize("NFD")
-                        .replace(/[\u0300-\u036f]/g, "");
-
-  spots.forEach(s => {
-    const marker = markers[s.nom];
-
-    // Normalisation du nom du spot
-    const spotNameNormalized = s.nom
-                                .toLowerCase()
-                                .normalize("NFD")
-                                .replace(/[\u0300-\u036f]/g, "");
-
-    const match =
-      (country === "" || s.pays.toLowerCase() === country) &&
-      (canton === "" || s.canton.toLowerCase() === canton) &&
-      (city === "" || s.ville.toLowerCase() === city) &&
-      (difficulty === "" || s.difficulte.toLowerCase() === difficulty) &&
-      (nameFilter === "" || spotNameNormalized.includes(nameFilter));
-
-    if (match) {
-      marker.addTo(map);
-    } else {
-      map.removeLayer(marker);
-      if (polylines[s.nom]) {
-        map.removeLayer(polylines[s.nom]);
-        delete polylines[s.nom];
-      }
+      countrySet.forEach(c => { const o=document.createElement('option'); o.value=c;o.text=c; fc.add(o); });
+      cantonSet.forEach(c => { const o=document.createElement('option'); o.value=c;o.text=c; fct.add(o); });
+      citySet.forEach(c => { const o=document.createElement('option'); o.value=c;o.text=c; fci.add(o); });
     }
-  });
+    populateFilters();
 
-  // Ferme le panneau de filtres automatiquement après application
-  document.getElementById('filterPanel').style.display = 'none';
-});
+    document.getElementById('applyFilterBtn').addEventListener('click', () => {
+      const country = document.getElementById('filterCountry').value;
+      const canton = document.getElementById('filterCanton').value;
+      const city = document.getElementById('filterCity').value;
+      const difficulty = document.getElementById('filterDifficulty').value;
 
-
-  // Ferme le panneau de filtres automatiquement après application
-  document.getElementById('filterPanel').style.display = 'none';
-});
-
+      spots.forEach(s => {
+        const marker = markers[s.nom];
+        const show = (country === "" || s.pays === country) &&
+                     (canton === "" || s.canton === canton) &&
+                     (city === "" || s.ville === city) &&
+                     (difficulty === "" || s.difficulte === difficulty);
+        if(show) marker.addTo(map);
+        else { map.removeLayer(marker); if(polylines[s.nom]) { map.removeLayer(polylines[s.nom]); delete polylines[s.nom]; } }
+      });
+    });
 
     // --- Envoyer un spot ---
     document.getElementById('spotSendBtn').addEventListener('click', () => {
@@ -1181,11 +1118,6 @@ document.getElementById('applyFilterBtn').addEventListener('click', () => {
   </script>
 </body>
 </html>
-
-
-
-
-
 
 
 
