@@ -124,6 +124,8 @@
         difficulte: "rouge",
         bitume: 4,
         trafic: 3,
+        longueur: "",        // <-- nouveau champ vide
+        penteMoyenne: "",    // <-- nouveau champ vide
         video: " ",
         lien: "https://maps.app.goo.gl/bXnBMYr7HbhJfJEc8",
         ville: "Lausanne",
@@ -1005,6 +1007,8 @@
         <b>${spot.nom}</b><br>
         Bitume: ${'⭐'.repeat(spot.bitume)}<br>
         Trafic: ${'🚗'.repeat(spot.trafic)}<br>
+        Longueur: ${spot.longueur}<br>
+        Pente moyenne: ${spot.penteMoyenne}<br>
         <a href="${spot.video}" target="_blank">Vidéo</a><br>
         <a href="${spot.lien}" target="_blank">Départ Google Maps</a>
       `);
@@ -1176,6 +1180,7 @@ document.getElementById('applyFilterBtn').addEventListener('click', () => {
   </script>
 </body>
 </html>
+
 
 
 
