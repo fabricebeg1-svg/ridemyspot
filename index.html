@@ -1194,27 +1194,22 @@ document.getElementById('applyFilterBtn').addEventListener('click', () => {
 
 // --- Envoyer un spot ---
 document.getElementById('spotSendBtn').addEventListener('click', () => {
-  const nom = document.getElementById('spotName').value;
-  const coords = document.getElementById('spotCoords').value;
-  const ville = document.getElementById('spotCity').value;
-  const canton = document.getElementById('spotCanton').value;
-  const pays = document.getElementById('spotCountry').value;
-  const difficulte = document.getElementById('spotDifficulty').value;
-  const bitume = document.getElementById('spotBitume').value;
-  const trafic = document.getElementById('spotTraffic').value;
-  const video = document.getElementById('spotVideo').value;
-
-  // 🟨 Nouveau champ commentaire
-  const commentaireField = document.getElementById('spotComment');
-  const commentaire = commentaireField ? commentaireField.value : "";
-
-  // Vérification basique
-  if (!nom || !coords) {
-    alert("Merci de remplir au minimum le nom du spot et le lien Google Maps !");
-    return;
-  }
-
-  const mailBody =
+  const nom = prompt("Nom du spot :");
+  if (!nom) return alert("Merci de remplir au minimum le nom du spot !");
+  
+  const coords = prompt("Lien Google Maps du spot :");
+  if (!coords) return alert("Merci de mettre le lien Google Maps !");
+  
+  const ville = prompt("Ville :");
+  const canton = prompt("Canton/Région :");
+  const pays = prompt("Pays :");
+  const difficulte = prompt("Difficulté (bleu, rouge, noir) :");
+  const bitume = prompt("Bitume (1 à 5) 5 = peau de bébé :");
+  const trafic = prompt("Trafic (1 à 5) :");
+  const video = prompt("Lien vidéo (facultatif) :");
+  const commentaire = prompt("Commentaire (facultatif) :");
+  
+  const mailBody = 
     `Nom: ${nom}\n` +
     `Lien Google Maps: ${coords}\n` +
     `Ville: ${ville}\n` +
@@ -1225,7 +1220,7 @@ document.getElementById('spotSendBtn').addEventListener('click', () => {
     `Trafic: ${trafic}\n` +
     `Vidéo: ${video}\n` +
     `Commentaire: ${commentaire || "Aucun"}`;
-
+  
   window.location.href = `mailto:fabricebeg1@gmail.com?subject=Nouveau Spot Freebord&body=${encodeURIComponent(mailBody)}`;
 });
 
@@ -1235,6 +1230,7 @@ document.getElementById('spotSendBtn').addEventListener('click', () => {
   </script>
 </body>
 </html>
+
 
 
 
