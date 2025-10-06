@@ -1010,6 +1010,7 @@
         Trafic: ${'🚗'.repeat(spot.trafic)}<br>
         Longueur: ${spot.longueur}<br>
         Pente moyenne: ${spot.penteMoyenne}<br>
+        ${spot.commentaire ? `<i>Commentaire: ${spot.commentaire}</i><br>` : ''}
         <a href="${spot.video}" target="_blank">Vidéo</a><br>
         <a href="${spot.lien}" target="_blank">Départ Google Maps</a>
       `);
@@ -1181,6 +1182,7 @@ document.getElementById('applyFilterBtn').addEventListener('click', () => {
   </script>
 </body>
 </html>
+
 
 
 
