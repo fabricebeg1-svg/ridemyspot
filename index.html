@@ -1005,21 +1005,27 @@ function addSpotMarker(spot) {
     icon: L.divIcon({ className: 'emoji-marker', html: emoji, iconSize: [24, 24] })
   }).addTo(map);
 
-  // Popup avec lien "Voir le commentaire" si commentaire existe, sinon "Aucun commentaire"
-  const commentaireHTML = spot.commentaire
-    ? `<a href="#" class="show-comment">Voir le commentaire</a><br>`
-    : `<i>Aucun commentaire</i><br>`;
+  // Fonction pour générer le contenu de la popup
+  function getPopupContent(showComment = false) {
+    const commentaireHTML = showComment
+      ? `<i>Commentaire: ${spot.commentaire}</i><br>`
+      : spot.commentaire
+        ? `<a href="#" class="show-comment">Voir le commentaire</a><br>`
+        : `<i>Aucun commentaire</i><br>`;
 
-  marker.bindPopup(`
-    <b>${spot.nom}</b><br>
-    Bitume: ${'⭐'.repeat(spot.bitume)}<br>
-    Trafic: ${'🚗'.repeat(spot.trafic)}<br>
-    Longueur: ${spot.longueur || 'N/A'}<br>
-    Pente moyenne: ${spot.penteMoyenne || 'N/A'}<br>
-    ${commentaireHTML}
-    <a href="${spot.video}" target="_blank">Vidéo</a><br>
-    <a href="${spot.lien}" target="_blank">Départ Google Maps</a>
-  `);
+    return `
+      <b>${spot.nom}</b><br>
+      Bitume: ${'⭐'.repeat(spot.bitume)}<br>
+      Trafic: ${'🚗'.repeat(spot.trafic)}<br>
+      Longueur: ${spot.longueur || 'N/A'}<br>
+      Pente moyenne: ${spot.penteMoyenne || 'N/A'}<br>
+      ${commentaireHTML}
+      <a href="${spot.video}" target="_blank">Vidéo</a><br>
+      <a href="${spot.lien}" target="_blank">Départ Google Maps</a>
+    `;
+  }
+
+  marker.bindPopup(getPopupContent());
 
   // Gestion du clic sur le lien "Voir le commentaire"
   marker.on('popupopen', function(e) {
@@ -1028,11 +1034,30 @@ function addSpotMarker(spot) {
     if (commentLink) {
       commentLink.addEventListener('click', function(event) {
         event.preventDefault();
-        // Remplace le lien par le vrai commentaire dans le popup
-        commentLink.outerHTML = `<i>Commentaire: ${spot.commentaire}</i><br>`;
+        // Rebind la popup avec le commentaire affiché
+        marker.setPopupContent(getPopupContent(true));
+        marker.openPopup();
       });
     }
   });
+
+  // Gestion du clic sur le marqueur pour afficher/masquer le polyline
+  marker.on('click', () => {
+    if (polylines[spot.nom]) {
+      map.removeLayer(polylines[spot.nom]);
+      delete polylines[spot.nom];
+    } else {
+      const color = spot.difficulte === "bleu" ? "#007bff" : spot.difficulte === "rouge" ? "#ff0000" : "#000000";
+      polylines[spot.nom] = L.polyline(spot.coordinates, { color: color, weight: 4 }).addTo(map);
+    }
+  });
+
+  markers[spot.nom] = marker;
+}
+
+// Ajouter tous les spots
+spots.forEach(addSpotMarker);
+
 
   // Gestion du clic sur le marker pour afficher/masquer la polyline
   marker.on('click', () => {
@@ -1221,6 +1246,7 @@ document.getElementById('applyFilterBtn').addEventListener('click', () => {
   </script>
 </body>
 </html>
+
 
 
 
