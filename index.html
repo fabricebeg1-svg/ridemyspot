@@ -996,39 +996,68 @@
 
     ];
 
-    const polylines = {};
-    const markers = {};
+   const polylines = {};
+const markers = {};
 
-    function addSpotMarker(spot) {
-      const emoji = spot.difficulte === "bleu" ? "🔵" : spot.difficulte === "rouge" ? "🔴" : "⚫";
-      const marker = L.marker(spot.coordinates[0], {
-        icon: L.divIcon({ className: 'emoji-marker', html: emoji, iconSize: [24,24] })
-      }).addTo(map);
+function addSpotMarker(spot) {
+  const emoji = spot.difficulte === "bleu" ? "🔵" : spot.difficulte === "rouge" ? "🔴" : "⚫";
 
-      marker.bindPopup(`
-        <b>${spot.nom}</b><br>
-        Bitume: ${'⭐'.repeat(spot.bitume)}<br>
-        Trafic: ${'🚗'.repeat(spot.trafic)}<br>
-        Longueur: ${spot.longueur}<br>
-        Pente moyenne: ${spot.penteMoyenne}<br>
-        <a href="${spot.video}" target="_blank">Vidéo</a><br>
-        <a href="${spot.lien}" target="_blank">Départ Google Maps</a>
-      `);
+  const marker = L.marker(spot.coordinates[0], {
+    icon: L.divIcon({ className: 'emoji-marker', html: emoji, iconSize: [24, 24] })
+  }).addTo(map);
 
-      marker.on('click', () => {
-        if(polylines[spot.nom]) {
-          map.removeLayer(polylines[spot.nom]);
-          delete polylines[spot.nom];
+  // Contenu principal du popup
+  marker.bindPopup(`
+    <b>${spot.nom}</b><br>
+    Bitume: ${'⭐'.repeat(spot.bitume)}<br>
+    Trafic: ${'🚗'.repeat(spot.trafic)}<br>
+    Longueur: ${spot.longueur || 'N/A'}<br>
+    Pente moyenne: ${spot.penteMoyenne || 'N/A'}<br>
+    <button class="toggle-comment">Commentaire</button>
+    <div class="comment-text" style="display:none; margin-top:5px;">
+      ${spot.commentaire ? `<i>${spot.commentaire}</i>` : '<i>Aucun commentaire</i>'}
+    </div>
+    <br>
+    <a href="${spot.video}" target="_blank">Vidéo</a><br>
+    <a href="${spot.lien}" target="_blank">Départ Google Maps</a>
+  `);
+
+  // Quand le popup s’ouvre, on prépare le bouton commentaire
+  marker.on('popupopen', function (e) {
+    const popupNode = e.popup.getElement();
+    const toggleBtn = popupNode.querySelector('.toggle-comment');
+    const commentDiv = popupNode.querySelector('.comment-text');
+
+    if (toggleBtn && commentDiv) {
+      toggleBtn.addEventListener('click', function () {
+        if (commentDiv.style.display === 'none') {
+          commentDiv.style.display = 'block';
         } else {
-          const color = spot.difficulte === "bleu" ? "#007bff" : spot.difficulte === "rouge" ? "#ff0000" : "#000000";
-          polylines[spot.nom] = L.polyline(spot.coordinates, {color: color, weight: 4}).addTo(map);
+          commentDiv.style.display = 'none';
         }
       });
-
-      markers[spot.nom] = marker;
     }
+  });
 
-    spots.forEach(addSpotMarker);
+  // Gestion du clic sur le marker pour afficher/masquer la polyline
+  marker.on('click', () => {
+    if (polylines[spot.nom]) {
+      map.removeLayer(polylines[spot.nom]);
+      delete polylines[spot.nom];
+    } else {
+      const color =
+        spot.difficulte === "bleu" ? "#007bff" :
+        spot.difficulte === "rouge" ? "#ff0000" :
+        "#000000";
+      polylines[spot.nom] = L.polyline(spot.coordinates, { color: color, weight: 4 }).addTo(map);
+    }
+  });
+
+  markers[spot.nom] = marker;
+}
+
+spots.forEach(addSpotMarker);
+
 
     // --- Centrer la carte sur tous les spots ---
 const allCoords = [];
@@ -1182,6 +1211,7 @@ document.getElementById('applyFilterBtn').addEventListener('click', () => {
   </script>
 </body>
 </html>
+
 
 
 
