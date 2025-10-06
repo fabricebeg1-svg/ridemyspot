@@ -995,40 +995,60 @@
 
     ];
 
-    const polylines = {};
-    const markers = {};
+const polylines = {};
+const markers = {};
 
-    function addSpotMarker(spot) {
-      const emoji = spot.difficulte === "bleu" ? "🔵" : spot.difficulte === "rouge" ? "🔴" : "⚫";
-      const marker = L.marker(spot.coordinates[0], {
-        icon: L.divIcon({ className: 'emoji-marker', html: emoji, iconSize: [24,24] })
-      }).addTo(map);
+function addSpotMarker(spot) {
+  const emoji = spot.difficulte === "bleu" ? "🔵" : spot.difficulte === "rouge" ? "🔴" : "⚫";
+  const marker = L.marker(spot.coordinates[0], {
+    icon: L.divIcon({ className: 'emoji-marker', html: emoji, iconSize: [24,24] })
+  }).addTo(map);
 
-      marker.bindPopup(`
-        <b>${spot.nom}</b><br>
-        Bitume: ${'⭐'.repeat(spot.bitume)}<br>
-        Trafic: ${'🚗'.repeat(spot.trafic)}<br>
-        Longueur: ${spot.longueur}<br>
-        Pente moyenne: ${spot.penteMoyenne}<br>
-       ${spot.commentaire !== undefined ? `<i>Commentaire: ${spot.commentaire || 'Aucun commentaire'}</i><br>` : ''}
-        <a href="${spot.video}" target="_blank">Vidéo</a><br>
-        <a href="${spot.lien}" target="_blank">Départ Google Maps</a>
-      `);
+  // Popup avec lien "Voir le commentaire" si commentaire existe, sinon "Aucun commentaire"
+  const commentaireHTML = spot.commentaire
+    ? `<a href="#" class="show-comment">Voir le commentaire</a><br>`
+    : `<i>Aucun commentaire</i><br>`;
 
-      marker.on('click', () => {
-        if(polylines[spot.nom]) {
-          map.removeLayer(polylines[spot.nom]);
-          delete polylines[spot.nom];
-        } else {
-          const color = spot.difficulte === "bleu" ? "#007bff" : spot.difficulte === "rouge" ? "#ff0000" : "#000000";
-          polylines[spot.nom] = L.polyline(spot.coordinates, {color: color, weight: 4}).addTo(map);
-        }
+  marker.bindPopup(`
+    <b>${spot.nom}</b><br>
+    Bitume: ${'⭐'.repeat(spot.bitume)}<br>
+    Trafic: ${'🚗'.repeat(spot.trafic)}<br>
+    Longueur: ${spot.longueur}<br>
+    Pente moyenne: ${spot.penteMoyenne}<br>
+    ${commentaireHTML}
+    <a href="${spot.video}" target="_blank">Vidéo</a><br>
+    <a href="${spot.lien}" target="_blank">Départ Google Maps</a>
+  `);
+
+  // Gestion du clic sur le lien "Voir le commentaire"
+  marker.on('popupopen', function(e) {
+    const popupNode = e.popup.getElement();
+    const commentLink = popupNode.querySelector('.show-comment');
+    if (commentLink) {
+      commentLink.addEventListener('click', function(event) {
+        event.preventDefault();
+        // Remplace le lien par le vrai commentaire dans le popup
+        commentLink.outerHTML = `<i>Commentaire: ${spot.commentaire}</i><br>`;
       });
-
-      markers[spot.nom] = marker;
     }
+  });
 
-    spots.forEach(addSpotMarker);
+  // Gestion du clic sur le marqueur pour afficher/masquer le polyline
+  marker.on('click', () => {
+    if(polylines[spot.nom]) {
+      map.removeLayer(polylines[spot.nom]);
+      delete polylines[spot.nom];
+    } else {
+      const color = spot.difficulte === "bleu" ? "#007bff" : spot.difficulte === "rouge" ? "#ff0000" : "#000000";
+      polylines[spot.nom] = L.polyline(spot.coordinates, {color: color, weight: 4}).addTo(map);
+    }
+  });
+
+  markers[spot.nom] = marker;
+}
+
+spots.forEach(addSpotMarker);
+
 
     // --- Centrer la carte sur tous les spots ---
 const allCoords = [];
@@ -1182,6 +1202,7 @@ document.getElementById('applyFilterBtn').addEventListener('click', () => {
   </script>
 </body>
 </html>
+
 
 
 
