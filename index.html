@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -135,8 +136,7 @@
           [46.51395,6.61827],[46.5139,6.61824],[46.51385,6.61822],[46.51332,6.61796],
           [46.51232,6.61746],[46.512,6.61732],[46.51192,6.61724],[46.51191,6.61723],
           [46.51187,6.61719],[46.51185,6.61716],[46.51183,6.61714]
-        ],
-        commentaire: "Belle pente bien large avec un super goudron"
+        ]
       },
   {
     nom:"Montolivet",
@@ -995,104 +995,39 @@
 
     ];
 
-const polylines = {};
-const markers = {};
+    const polylines = {};
+    const markers = {};
 
-function addSpotMarker(spot) {
-  const emoji = spot.difficulte === "bleu" ? "🔵" : spot.difficulte === "rouge" ? "🔴" : "⚫";
+    function addSpotMarker(spot) {
+      const emoji = spot.difficulte === "bleu" ? "🔵" : spot.difficulte === "rouge" ? "🔴" : "⚫";
+      const marker = L.marker(spot.coordinates[0], {
+        icon: L.divIcon({ className: 'emoji-marker', html: emoji, iconSize: [24,24] })
+      }).addTo(map);
 
-  const marker = L.marker(spot.coordinates[0], {
-    icon: L.divIcon({ className: 'emoji-marker', html: emoji, iconSize: [24, 24] })
-  }).addTo(map);
+      marker.bindPopup(`
+        <b>${spot.nom}</b><br>
+        Bitume: ${'⭐'.repeat(spot.bitume)}<br>
+        Trafic: ${'🚗'.repeat(spot.trafic)}<br>
+        Longueur: ${spot.longueur}<br>
+        Pente moyenne: ${spot.penteMoyenne}<br>
+        <a href="${spot.video}" target="_blank">Vidéo</a><br>
+        <a href="${spot.lien}" target="_blank">Départ Google Maps</a>
+      `);
 
-  // Fonction pour générer le contenu de la popup
-  function getPopupContent(showComment = false) {
-    const commentaireHTML = showComment
-      ? `<i>Commentaire: ${spot.commentaire}</i><br>`
-      : spot.commentaire
-        ? `<a href="#" class="show-comment">Voir le commentaire</a><br>`
-        : `<i>Aucun commentaire</i><br>`;
-
-    return `
-      <b>${spot.nom}</b><br>
-      Bitume: ${'⭐'.repeat(spot.bitume)}<br>
-      Trafic: ${'🚗'.repeat(spot.trafic)}<br>
-      Longueur: ${spot.longueur || 'N/A'}<br>
-      Pente moyenne: ${spot.penteMoyenne || 'N/A'}<br>
-      ${commentaireHTML}
-      <a href="${spot.video}" target="_blank">Vidéo</a><br>
-      <a href="${spot.lien}" target="_blank">Départ Google Maps</a>
-    `;
-  }
-
-  marker.bindPopup(getPopupContent());
-
-  // Gestion du clic sur le lien "Voir le commentaire"
-  marker.on('popupopen', function(e) {
-    const popupNode = e.popup.getElement();
-    const commentLink = popupNode.querySelector('.show-comment');
-    if (commentLink) {
-      commentLink.addEventListener('click', function(event) {
-        event.preventDefault();
-        // Rebind la popup avec le commentaire affiché
-        marker.setPopupContent(getPopupContent(true));
-        marker.openPopup();
+      marker.on('click', () => {
+        if(polylines[spot.nom]) {
+          map.removeLayer(polylines[spot.nom]);
+          delete polylines[spot.nom];
+        } else {
+          const color = spot.difficulte === "bleu" ? "#007bff" : spot.difficulte === "rouge" ? "#ff0000" : "#000000";
+          polylines[spot.nom] = L.polyline(spot.coordinates, {color: color, weight: 4}).addTo(map);
+        }
       });
+
+      markers[spot.nom] = marker;
     }
-  });
 
-  // Gestion du clic sur le marqueur pour afficher/masquer le polyline
-  marker.on('click', () => {
-    if (polylines[spot.nom]) {
-      map.removeLayer(polylines[spot.nom]);
-      delete polylines[spot.nom];
-    } else {
-      const color = spot.difficulte === "bleu" ? "#007bff" : spot.difficulte === "rouge" ? "#ff0000" : "#000000";
-      polylines[spot.nom] = L.polyline(spot.coordinates, { color: color, weight: 4 }).addTo(map);
-    }
-  });
-
-  markers[spot.nom] = marker;
-}
-
-// Ajouter tous les spots
-spots.forEach(addSpotMarker);
-
-
-  // Gestion du clic sur le marker pour afficher/masquer la polyline
-  marker.on('click', () => {
-    if (polylines[spot.nom]) {
-      map.removeLayer(polylines[spot.nom]);
-      delete polylines[spot.nom];
-    } else {
-      const color = spot.difficulte === "bleu" ? "#007bff" : spot.difficulte === "rouge" ? "#ff0000" : "#000000";
-      polylines[spot.nom] = L.polyline(spot.coordinates, { color: color, weight: 4 }).addTo(map);
-    }
-  });
-
-  markers[spot.nom] = marker;
-}
-
-// Ajouter tous les spots
-spots.forEach(addSpotMarker);
-
-
-  // Gestion du clic sur le marqueur pour afficher/masquer le polyline
-  marker.on('click', () => {
-    if(polylines[spot.nom]) {
-      map.removeLayer(polylines[spot.nom]);
-      delete polylines[spot.nom];
-    } else {
-      const color = spot.difficulte === "bleu" ? "#007bff" : spot.difficulte === "rouge" ? "#ff0000" : "#000000";
-      polylines[spot.nom] = L.polyline(spot.coordinates, {color: color, weight: 4}).addTo(map);
-    }
-  });
-
-  markers[spot.nom] = marker;
-}
-
-spots.forEach(addSpotMarker);
-
+    spots.forEach(addSpotMarker);
 
     // --- Centrer la carte sur tous les spots ---
 const allCoords = [];
@@ -1246,14 +1181,6 @@ document.getElementById('applyFilterBtn').addEventListener('click', () => {
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
 
 
 
