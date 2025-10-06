@@ -1194,21 +1194,17 @@ document.getElementById('applyFilterBtn').addEventListener('click', () => {
 
 // --- Envoyer un spot ---
 document.getElementById('spotSendBtn').addEventListener('click', () => {
-  const nom = prompt("Nom du spot :");
-  if (!nom) return alert("Merci de remplir au minimum le nom du spot !");
-  
-  const coords = prompt("Lien Google Maps du spot :");
-  if (!coords) return alert("Merci de mettre le lien Google Maps !");
-  
-  const ville = prompt("Ville :");
-  const canton = prompt("Canton/Région :");
-  const pays = prompt("Pays :");
-  const difficulte = prompt("Difficulté (bleu, rouge, noir) :");
-  const bitume = prompt("Bitume (1 à 5) 5 = peau de bébé :");
-  const trafic = prompt("Trafic (1 à 5) :");
-  const video = prompt("Lien vidéo (facultatif) :");
-  const commentaire = prompt("Commentaire (facultatif) :");
-  
+  const nom = document.getElementById('spotName').value;
+  const coords = document.getElementById('spotCoords').value;
+  const ville = document.getElementById('spotCity').value;
+  const canton = document.getElementById('spotCanton').value;
+  const pays = document.getElementById('spotCountry').value;
+  const difficulte = document.getElementById('spotDifficulty').value;
+  const bitume = document.getElementById('spotBitume').value;
+  const trafic = document.getElementById('spotTraffic').value;
+  const video = document.getElementById('spotVideo').value;
+  const commentaire = document.getElementById('spotComment').value; // <-- ligne commentaire
+
   const mailBody = 
     `Nom: ${nom}\n` +
     `Lien Google Maps: ${coords}\n` +
@@ -1219,10 +1215,11 @@ document.getElementById('spotSendBtn').addEventListener('click', () => {
     `Bitume: ${bitume}\n` +
     `Trafic: ${trafic}\n` +
     `Vidéo: ${video}\n` +
-    `Commentaire: ${commentaire || "Aucun"}`;
-  
+    `Commentaire: ${commentaire || "Aucun"}`; // <-- ajout dans le mail
+
   window.location.href = `mailto:fabricebeg1@gmail.com?subject=Nouveau Spot Freebord&body=${encodeURIComponent(mailBody)}`;
 });
+
 
 
 
@@ -1230,6 +1227,7 @@ document.getElementById('spotSendBtn').addEventListener('click', () => {
   </script>
 </body>
 </html>
+
 
 
 
