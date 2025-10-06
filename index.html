@@ -1192,96 +1192,50 @@ document.getElementById('applyFilterBtn').addEventListener('click', () => {
 
 
 
-<!-- 🟩 Fenêtre "Ajouter un spot" -->
-<div id="addSpotWindow" style="display:none; padding:10px; background:white; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.3); max-width:400px; margin:auto;">
-  <h3>Ajouter un spot</h3>
+// --- Envoyer un spot ---
+document.getElementById('spotSendBtn').addEventListener('click', () => {
+  const nom = document.getElementById('spotName').value;
+  const coords = document.getElementById('spotCoords').value;
+  const ville = document.getElementById('spotCity').value;
+  const canton = document.getElementById('spotCanton').value;
+  const pays = document.getElementById('spotCountry').value;
+  const difficulte = document.getElementById('spotDifficulty').value;
+  const bitume = document.getElementById('spotBitume').value;
+  const trafic = document.getElementById('spotTraffic').value;
+  const video = document.getElementById('spotVideo').value;
 
-  <label for="spotName"><b>Nom du spot :</b></label><br>
-  <input id="spotName" type="text" placeholder="Ex: Les Bains" style="width:100%;"><br><br>
+  // 🟨 Nouveau champ commentaire
+  const commentaireField = document.getElementById('spotComment');
+  const commentaire = commentaireField ? commentaireField.value : "";
 
-  <label for="spotCoords"><b>Lien Google Maps :</b></label><br>
-  <input id="spotCoords" type="text" placeholder="https://maps.app.goo.gl/..." style="width:100%;"><br><br>
+  // Vérification basique
+  if (!nom || !coords) {
+    alert("Merci de remplir au minimum le nom du spot et le lien Google Maps !");
+    return;
+  }
 
-  <label for="spotCity"><b>Ville :</b></label><br>
-  <input id="spotCity" type="text" placeholder="Ex: Lausanne" style="width:100%;"><br><br>
+  const mailBody =
+    `Nom: ${nom}\n` +
+    `Lien Google Maps: ${coords}\n` +
+    `Ville: ${ville}\n` +
+    `Canton/Région: ${canton}\n` +
+    `Pays: ${pays}\n` +
+    `Difficulté: ${difficulte}\n` +
+    `Bitume: ${bitume}\n` +
+    `Trafic: ${trafic}\n` +
+    `Vidéo: ${video}\n` +
+    `Commentaire: ${commentaire || "Aucun"}`;
 
-  <label for="spotCanton"><b>Canton / Région :</b></label><br>
-  <input id="spotCanton" type="text" placeholder="Ex: VD" style="width:100%;"><br><br>
+  window.location.href = `mailto:fabricebeg1@gmail.com?subject=Nouveau Spot Freebord&body=${encodeURIComponent(mailBody)}`;
+});
 
-  <label for="spotCountry"><b>Pays :</b></label><br>
-  <input id="spotCountry" type="text" placeholder="Ex: Suisse" style="width:100%;"><br><br>
-
-  <label for="spotDifficulty"><b>Difficulté :</b></label><br>
-  <select id="spotDifficulty" style="width:100%;">
-    <option value="">-- Sélectionne --</option>
-    <option value="bleu">Bleu (facile)</option>
-    <option value="rouge">Rouge (intermédiaire)</option>
-    <option value="noir">Noir (difficile)</option>
-  </select><br><br>
-
-  <label for="spotBitume"><b>Qualité du bitume (1 à 5) :</b></label><br>
-  <input id="spotBitume" type="number" min="1" max="5" style="width:100%;" placeholder="Ex: 4"><br><br>
-
-  <label for="spotTraffic"><b>Trafic (1 à 5) :</b></label><br>
-  <input id="spotTraffic" type="number" min="1" max="5" style="width:100%;" placeholder="Ex: 2"><br><br>
-
-  <label for="spotVideo"><b>Lien vidéo (facultatif) :</b></label><br>
-  <input id="spotVideo" type="text" placeholder="https://youtube.com/..." style="width:100%;"><br><br>
-
-  <!-- 🟨 Nouveau champ Commentaire -->
-  <label for="spotComment"><b>Commentaire :</b></label><br>
-  <textarea id="spotComment" 
-            placeholder="Ajoute un commentaire sur le spot (facultatif)" 
-            rows="3" 
-            style="width: 100%; resize: vertical;"></textarea>
-  <br><br>
-
-  <button id="spotSendBtn" style="width:100%; background:#007bff; color:white; padding:10px; border:none; border-radius:5px; cursor:pointer;">
-    Envoyer le spot
-  </button>
-</div>
-
-<script>
-  // --- Envoi du spot par mail ---
-  document.getElementById('spotSendBtn').addEventListener('click', () => {
-    const nom = document.getElementById('spotName').value;
-    const coords = document.getElementById('spotCoords').value;
-    const ville = document.getElementById('spotCity').value;
-    const canton = document.getElementById('spotCanton').value;
-    const pays = document.getElementById('spotCountry').value;
-    const difficulte = document.getElementById('spotDifficulty').value;
-    const bitume = document.getElementById('spotBitume').value;
-    const trafic = document.getElementById('spotTraffic').value;
-    const video = document.getElementById('spotVideo').value;
-    const commentaire = document.getElementById('spotComment').value; // <-- champ ajouté
-
-    // Vérification minimale
-    if (!nom || !coords) {
-      alert("Merci de remplir au minimum le nom du spot et le lien Google Maps !");
-      return;
-    }
-
-    const mailBody =
-      `Nom: ${nom}\n` +
-      `Lien Google Maps: ${coords}\n` +
-      `Ville: ${ville}\n` +
-      `Canton/Région: ${canton}\n` +
-      `Pays: ${pays}\n` +
-      `Difficulté: ${difficulte}\n` +
-      `Bitume: ${bitume}\n` +
-      `Trafic: ${trafic}\n` +
-      `Vidéo: ${video}\n` +
-      `Commentaire: ${commentaire || "Aucun"}`;
-
-    window.location.href = `mailto:fabricebeg1@gmail.com?subject=Nouveau Spot Freebord&body=${encodeURIComponent(mailBody)}`;
-  });
-</script>
 
 
 
   </script>
 </body>
 </html>
+
 
 
 
