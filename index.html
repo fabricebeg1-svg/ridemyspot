@@ -1192,25 +1192,45 @@ document.getElementById('applyFilterBtn').addEventListener('click', () => {
 
 
 
-    // --- Envoyer un spot ---
-    document.getElementById('spotSendBtn').addEventListener('click', () => {
-      const nom = document.getElementById('spotName').value;
-      const coords = document.getElementById('spotCoords').value;
-      const ville = document.getElementById('spotCity').value;
-      const canton = document.getElementById('spotCanton').value;
-      const pays = document.getElementById('spotCountry').value;
-      const difficulte = document.getElementById('spotDifficulty').value;
-      const bitume = document.getElementById('spotBitume').value;
-      const trafic = document.getElementById('spotTraffic').value;
-      const video = document.getElementById('spotVideo').value;
+ // --- Envoyer un spot ---
+document.getElementById('spotSendBtn').addEventListener('click', () => {
+  const nom = document.getElementById('spotName').value;
+  const coords = document.getElementById('spotCoords').value;
+  const ville = document.getElementById('spotCity').value;
+  const canton = document.getElementById('spotCanton').value;
+  const pays = document.getElementById('spotCountry').value;
+  const difficulte = document.getElementById('spotDifficulty').value;
+  const bitume = document.getElementById('spotBitume').value;
+  const trafic = document.getElementById('spotTraffic').value;
+  const video = document.getElementById('spotVideo').value;
+  const commentaire = document.getElementById('spotComment').value; // <-- nouveau champ
 
-      const mailBody = `Nom: ${nom}\nLien Google Maps: ${coords}\nVille: ${ville}\nCanton/Région: ${canton}\nPays: ${pays}\nDifficulté: ${difficulte}\nBitume: ${bitume}\nTrafic: ${trafic}\nVidéo: ${video}`;
-      window.location.href = `mailto:fabricebeg1@gmail.com?subject=Nouveau Spot Freebord&body=${encodeURIComponent(mailBody)}`;
-    });
+  // Vérification basique
+  if (!nom || !coords) {
+    alert("Merci de remplir au minimum le nom du spot et le lien Google Maps !");
+    return;
+  }
+
+  const mailBody = 
+    `Nom: ${nom}\n` +
+    `Lien Google Maps: ${coords}\n` +
+    `Ville: ${ville}\n` +
+    `Canton/Région: ${canton}\n` +
+    `Pays: ${pays}\n` +
+    `Difficulté: ${difficulte}\n` +
+    `Bitume: ${bitume}\n` +
+    `Trafic: ${trafic}\n` +
+    `Vidéo: ${video}\n` +
+    `Commentaire: ${commentaire || "Aucun"}`;
+
+  window.location.href = `mailto:fabricebeg1@gmail.com?subject=Nouveau Spot Freebord&body=${encodeURIComponent(mailBody)}`;
+});
+
 
   </script>
 </body>
 </html>
+
 
 
 
