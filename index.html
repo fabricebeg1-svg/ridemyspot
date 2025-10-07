@@ -1195,7 +1195,6 @@ document.getElementById('applyFilterBtn').addEventListener('click', () => {
 
 // --- Envoyer un spot ---
 document.getElementById('spotSendBtn').addEventListener('click', () => {
-  // Récupération des valeurs des champs
   const nom = document.getElementById('spotName').value.trim();
   const coords = document.getElementById('spotCoords').value.trim();
   const ville = document.getElementById('spotCity').value.trim();
@@ -1207,22 +1206,21 @@ document.getElementById('spotSendBtn').addEventListener('click', () => {
   const video = document.getElementById('spotVideo').value.trim();
   const commentaire = document.getElementById('spotComment').value.trim() || "Aucun";
 
-  // Construction du corps du mail
-  const mailBody = `
-Nom: ${nom}
-Lien Google Maps: ${coords}
-Ville: ${ville}
-Canton/Région: ${canton}
-Pays: ${pays}
-Difficulté: ${difficulte}
-Bitume: ${bitume}
-Trafic: ${trafic}
-Vidéo: ${video}
-Commentaire: ${commentaire}
-  `;
+  // Corps du mail avec retours à la ligne encodés
+  const mailBody = [
+    `Nom: ${nom}`,
+    `Lien Google Maps: ${coords}`,
+    `Ville: ${ville}`,
+    `Canton/Région: ${canton}`,
+    `Pays: ${pays}`,
+    `Difficulté: ${difficulte}`,
+    `Bitume: ${bitume}`,
+    `Trafic: ${trafic}`,
+    `Vidéo: ${video}`,
+    `Commentaire: ${commentaire}`
+  ].join('%0D%0A'); // %0D%0A = retour chariot + saut de ligne
 
-  // Création du mailto complet avec encodage
-  const mailtoLink = `mailto:fabricebeg1@gmail.com?subject=${encodeURIComponent('Nouveau Spot Freebord')}&body=${encodeURIComponent(mailBody)}`;
+  const mailtoLink = `mailto:fabricebeg1@gmail.com?subject=${encodeURIComponent('Nouveau Spot Freebord')}&body=${mailBody}`;
 
   // Ouverture du client mail
   window.location.href = mailtoLink;
@@ -1237,6 +1235,7 @@ Commentaire: ${commentaire}
   </script>
 </body>
 </html>
+
 
 
 
