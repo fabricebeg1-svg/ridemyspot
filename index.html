@@ -1196,32 +1196,36 @@ document.getElementById('applyFilterBtn').addEventListener('click', () => {
 // --- Envoyer un spot ---
 document.getElementById('spotSendBtn').addEventListener('click', () => {
   // Récupération des valeurs des champs
-  const nom = document.getElementById('spotName').value;
-  const coords = document.getElementById('spotCoords').value;
-  const ville = document.getElementById('spotCity').value;
-  const canton = document.getElementById('spotCanton').value;
-  const pays = document.getElementById('spotCountry').value;
-  const difficulte = document.getElementById('spotDifficulty').value;
-  const bitume = document.getElementById('spotBitume').value;
-  const trafic = document.getElementById('spotTraffic').value;
-  const video = document.getElementById('spotVideo').value;
-  const commentaire = document.getElementById('spotComment').value;
+  const nom = document.getElementById('spotName').value.trim();
+  const coords = document.getElementById('spotCoords').value.trim();
+  const ville = document.getElementById('spotCity').value.trim();
+  const canton = document.getElementById('spotCanton').value.trim();
+  const pays = document.getElementById('spotCountry').value.trim();
+  const difficulte = document.getElementById('spotDifficulty').value.trim();
+  const bitume = document.getElementById('spotBitume').value.trim();
+  const trafic = document.getElementById('spotTraffic').value.trim();
+  const video = document.getElementById('spotVideo').value.trim();
+  const commentaire = document.getElementById('spotComment').value.trim() || "Aucun";
 
   // Construction du corps du mail
-  const mailBody =
-    `Nom: ${nom}\n` +
-    `Lien Google Maps: ${coords}\n` +
-    `Ville: ${ville}\n` +
-    `Canton/Région: ${canton}\n` +
-    `Pays: ${pays}\n` +
-    `Difficulté: ${difficulte}\n` +
-    `Bitume: ${bitume}\n` +
-    `Trafic: ${trafic}\n` +
-    `Vidéo: ${video}\n` +
-    `Commentaire: ${commentaire || "Aucun"}`;
+  const mailBody = `
+Nom: ${nom}
+Lien Google Maps: ${coords}
+Ville: ${ville}
+Canton/Région: ${canton}
+Pays: ${pays}
+Difficulté: ${difficulte}
+Bitume: ${bitume}
+Trafic: ${trafic}
+Vidéo: ${video}
+Commentaire: ${commentaire}
+  `;
 
-  // Ouverture du client mail avec les informations
-  window.location.href = `mailto:fabricebeg1@gmail.com?subject=Nouveau Spot Freebord&body=${encodeURIComponent(mailBody)}`;
+  // Création du mailto complet avec encodage
+  const mailtoLink = `mailto:fabricebeg1@gmail.com?subject=${encodeURIComponent('Nouveau Spot Freebord')}&body=${encodeURIComponent(mailBody)}`;
+
+  // Ouverture du client mail
+  window.location.href = mailtoLink;
 });
 
 
@@ -1232,6 +1236,7 @@ document.getElementById('spotSendBtn').addEventListener('click', () => {
   </script>
 </body>
 </html>
+
 
 
 
