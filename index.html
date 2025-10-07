@@ -1195,6 +1195,7 @@ document.getElementById('applyFilterBtn').addEventListener('click', () => {
 
 // --- Envoyer un spot ---
 document.getElementById('spotSendBtn').addEventListener('click', () => {
+  // Récupération des valeurs des champs
   const nom = document.getElementById('spotName').value;
   const coords = document.getElementById('spotCoords').value;
   const ville = document.getElementById('spotCity').value;
@@ -1204,9 +1205,10 @@ document.getElementById('spotSendBtn').addEventListener('click', () => {
   const bitume = document.getElementById('spotBitume').value;
   const trafic = document.getElementById('spotTraffic').value;
   const video = document.getElementById('spotVideo').value;
-  const commentaire = document.getElementById('spotComment').value; // <-- ligne commentaire
+  const commentaire = document.getElementById('spotComment').value;
 
-  const mailBody = 
+  // Construction du corps du mail
+  const mailBody =
     `Nom: ${nom}\n` +
     `Lien Google Maps: ${coords}\n` +
     `Ville: ${ville}\n` +
@@ -1216,10 +1218,12 @@ document.getElementById('spotSendBtn').addEventListener('click', () => {
     `Bitume: ${bitume}\n` +
     `Trafic: ${trafic}\n` +
     `Vidéo: ${video}\n` +
-    `Commentaire: ${commentaire || "Aucun"}`; // <-- ajout dans le mail
+    `Commentaire: ${commentaire || "Aucun"}`;
 
+  // Ouverture du client mail avec les informations
   window.location.href = `mailto:fabricebeg1@gmail.com?subject=Nouveau Spot Freebord&body=${encodeURIComponent(mailBody)}`;
 });
+
 
 
 
@@ -1228,6 +1232,7 @@ document.getElementById('spotSendBtn').addEventListener('click', () => {
   </script>
 </body>
 </html>
+
 
 
 
