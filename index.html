@@ -1214,36 +1214,33 @@ document.addEventListener('DOMContentLoaded', function() {
     const trafic = document.getElementById('spotTraffic').value.trim();
     const video = document.getElementById('spotVideo').value.trim();
     const commentaire = document.getElementById('spotCommentaire').value.trim() || "Aucun";
-    
-    // Corps du mail avec retours à la ligne encodés
-    const mailBody = [
-      `Nom: ${nom}`,
-      `Lien Google Maps: ${coords}`,
-      `Ville: ${ville}`,
-      `Canton/Région: ${canton}`,
-      `Pays: ${pays}`,
-      `Difficulté: ${difficulte}`,
-      `Bitume: ${bitume}`,
-      `Trafic: ${trafic}`,
-      `Vidéo: ${video}`,
-      `Commentaire: ${commentaire}`
-    ].join('%0D%0A'); // %0D%0A = retour chariot + saut de ligne
-    
-    const mailtoLink = `mailto:fabricebeg1@gmail.com?subject=${encodeURIComponent('Nouveau Spot Freebord')}&body=${mailBody}`;
-    
+
+    // Corps du mail compact (évite les retours à la ligne qui causent le troncage)
+    const mailBody = `
+Nom: ${nom} | 
+Lien Google Maps: ${coords} | 
+Ville: ${ville} | 
+Canton/Région: ${canton} | 
+Pays: ${pays} | 
+Difficulté: ${difficulte} | 
+Bitume: ${bitume} | 
+Trafic: ${trafic} | 
+Vidéo: ${video} | 
+Commentaire: ${commentaire}
+    `.replace(/\n/g, '').trim(); // Supprime tout retour à la ligne réel
+
+    // Construction du mailto avec encodage propre
+    const mailtoLink = `mailto:fabricebeg1@gmail.com?subject=${encodeURIComponent('Nouveau Spot Freebord')}&body=${encodeURIComponent(mailBody)}`;
+
     // Ouverture du client mail
     window.location.href = mailtoLink;
   });
 });
 
-
-
-
-
-
   </script>
 </body>
 </html>
+
 
 
 
