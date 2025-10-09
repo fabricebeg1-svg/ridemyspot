@@ -1413,41 +1413,79 @@ map.on("locationfound", e => {
       window.location.href = 'mailto:fabricebeg1@gmail.com?subject=Aide Freebord';
     });
 
- // --- Filtres dynamiques ---
+// --- Filtres dynamiques ---
 function populateFilters() {
   const countrySet = new Set();
-  const cantonSet = new Set();
-  const citySet = new Set();
+  const cantonMap = new Map(); // Canton → Set de villes
 
   spots.forEach(s => {
     countrySet.add(s.pays);
-    cantonSet.add(s.canton);
-    citySet.add(s.ville);
+
+    if (!cantonMap.has(s.canton)) {
+      cantonMap.set(s.canton, new Set());
+    }
+    cantonMap.get(s.canton).add(s.ville);
   });
 
   const fc = document.getElementById('filterCountry');
   const fct = document.getElementById('filterCanton');
   const fci = document.getElementById('filterCity');
 
-  countrySet.forEach(c => {
+  // Réinitialiser les listes
+  fc.innerHTML = '<option value="">Tous les pays</option>';
+  fct.innerHTML = '<option value="">Tous les cantons</option>';
+  fci.innerHTML = '<option value="">Toutes les villes</option>';
+
+  // Peupler pays (triés)
+  Array.from(countrySet).sort().forEach(c => {
     const o = document.createElement('option');
     o.value = c;
     o.text = c;
     fc.add(o);
   });
 
-  cantonSet.forEach(c => {
+  // Peupler cantons (triés)
+  Array.from(cantonMap.keys()).sort().forEach(canton => {
     const o = document.createElement('option');
-    o.value = c;
-    o.text = c;
+    o.value = canton;
+    o.text = canton;
     fct.add(o);
   });
 
-  citySet.forEach(c => {
+  // Peupler toutes les villes au départ (triées)
+  const allCities = new Set();
+  cantonMap.forEach(set => set.forEach(v => allCities.add(v)));
+  Array.from(allCities).sort().forEach(ville => {
     const o = document.createElement('option');
-    o.value = c;
-    o.text = c;
+    o.value = ville;
+    o.text = ville;
     fci.add(o);
+  });
+
+  // --- Événement : quand on change de canton, filtrer les villes ---
+  fct.addEventListener('change', () => {
+    const selectedCanton = fct.value;
+    fci.innerHTML = '<option value="">Toutes les villes</option>'; // reset
+
+    if (selectedCanton && cantonMap.has(selectedCanton)) {
+      const cities = Array.from(cantonMap.get(selectedCanton)).sort();
+      cities.forEach(ville => {
+        const o = document.createElement('option');
+        o.value = ville;
+        o.text = ville;
+        fci.add(o);
+      });
+    } else {
+      // Si aucun canton sélectionné, toutes les villes triées
+      const allCities = new Set();
+      cantonMap.forEach(set => set.forEach(v => allCities.add(v)));
+      Array.from(allCities).sort().forEach(ville => {
+        const o = document.createElement('option');
+        o.value = ville;
+        o.text = ville;
+        fci.add(o);
+      });
+    }
   });
 }
 
@@ -1460,6 +1498,7 @@ document.getElementById('applyFilterBtn').addEventListener('click', () => {
   const city = document.getElementById('filterCity').value.trim().toLowerCase();
   const difficulty = document.getElementById('filterDifficulty').value.trim().toLowerCase();
 
+  // Normalisation pour les accents et majuscules
   const nameFilter = document.getElementById('filterName').value
                         .trim()
                         .toLowerCase()
@@ -1468,7 +1507,6 @@ document.getElementById('applyFilterBtn').addEventListener('click', () => {
 
   spots.forEach(s => {
     const marker = markers[s.nom];
-
     const spotNameNormalized = s.nom
                                 .toLowerCase()
                                 .normalize("NFD")
@@ -1492,35 +1530,31 @@ document.getElementById('applyFilterBtn').addEventListener('click', () => {
     }
   });
 
-  // Ferme le panneau après application
   document.getElementById('filterPanel').style.display = 'none';
 });
 
-
-// --- Réinitialisation des filtres ---
+// --- Réinitialiser les filtres ---
 document.getElementById('resetFilterBtn').addEventListener('click', () => {
-  // Réinitialise tous les champs
   document.getElementById('filterCountry').value = "";
   document.getElementById('filterCanton').value = "";
   document.getElementById('filterCity').value = "";
   document.getElementById('filterDifficulty').value = "";
   document.getElementById('filterName').value = "";
 
-  // Réaffiche tous les spots et polylines
+  // Réafficher tous les markers
   spots.forEach(s => {
     const marker = markers[s.nom];
     if (!map.hasLayer(marker)) {
       marker.addTo(map);
     }
-    if (s.coordinates && !polylines[s.nom]) {
-      const polyline = L.polyline(s.coordinates, { color: getColorByDifficulty(s.difficulte) }).addTo(map);
-      polylines[s.nom] = polyline;
-    }
   });
+
+  // Réinitialiser complètement les listes déroulantes triées
+  populateFilters();
+
+  // Fermer le panneau (optionnel)
+  document.getElementById('filterPanel').style.display = 'none';
 });
-
-
-
 
 // --- Envoyer un spot ---
 document.addEventListener('DOMContentLoaded', function() {
@@ -1561,6 +1595,7 @@ Commentaire: ${commentaire}
   </script>
 </body>
 </html>
+
 
 
 
