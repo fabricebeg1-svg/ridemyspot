@@ -1451,83 +1451,115 @@
       window.location.href = 'mailto:fabricebeg1@gmail.com?subject=Aide Freebord';
     });
 
-    // --- Filtres dynamiques ---
-    function populateFilters() {
-      const countrySet = new Set();
-      const cantonSet = new Set();
-      const citySet = new Set();
+  // --- Filtres dynamiques en cascade ---
+function populateFilters() {
+  const fc = document.getElementById('filterCountry');
+  const fct = document.getElementById('filterCanton');
+  const fci = document.getElementById('filterCity');
 
-      spots.forEach(s => {
-        countrySet.add(s.pays);
-        cantonSet.add(s.canton);
-        citySet.add(s.ville);
-      });
+  // Fonction pour remplir un select avec un ensemble
+  function fillSelect(select, values) {
+    select.innerHTML = '<option value="">Tous</option>';
+    Array.from(values).sort().forEach(v => {
+      const o = document.createElement('option');
+      o.value = v;
+      o.text = v;
+      select.add(o);
+    });
+  }
 
-      const fc = document.getElementById('filterCountry');
-      const fct = document.getElementById('filterCanton');
-      const fci = document.getElementById('filterCity');
+  // Initialement, tous les pays, cantons et villes
+  const countries = new Set(spots.map(s => s.pays));
+  const cantons = new Set(spots.map(s => s.canton));
+  const cities = new Set(spots.map(s => s.ville));
 
-      countrySet.forEach(c => { const o = document.createElement('option'); o.value=c;o.text=c;fc.add(o); });
-      cantonSet.forEach(c => { const o = document.createElement('option'); o.value=c;o.text=c;fct.add(o); });
-      citySet.forEach(c => { const o = document.createElement('option'); o.value=c;o.text=c;fci.add(o); });
+  fillSelect(fc, countries);
+  fillSelect(fct, cantons);
+  fillSelect(fci, cities);
+
+  // --- Mise à jour dynamique des cantons et villes selon le pays ---
+  fc.addEventListener('change', () => {
+    const selectedCountry = fc.value;
+    const filteredCantons = new Set(spots.filter(s => !selectedCountry || s.pays === selectedCountry).map(s => s.canton));
+    fillSelect(fct, filteredCantons);
+
+    const filteredCities = new Set(spots.filter(s => !selectedCountry || s.pays === selectedCountry).map(s => s.ville));
+    fillSelect(fci, filteredCities);
+  });
+
+  // --- Mise à jour dynamique des villes selon le canton ---
+  fct.addEventListener('change', () => {
+    const selectedCountry = fc.value;
+    const selectedCanton = fct.value;
+    const filteredCities = new Set(spots.filter(s => 
+      (!selectedCountry || s.pays === selectedCountry) &&
+      (!selectedCanton || s.canton === selectedCanton)
+    ).map(s => s.ville));
+    fillSelect(fci, filteredCities);
+  });
+}
+
+populateFilters();
+
+// --- Application des filtres ---
+document.getElementById('applyFilterBtn').addEventListener('click', () => {
+  const country = document.getElementById('filterCountry').value.trim().toLowerCase();
+  const canton = document.getElementById('filterCanton').value.trim().toLowerCase();
+  const city = document.getElementById('filterCity').value.trim().toLowerCase();
+  const difficulty = document.getElementById('filterDifficulty').value.trim().toLowerCase();
+
+  const nameFilter = document.getElementById('filterName').value
+                        .trim()
+                        .toLowerCase()
+                        .normalize("NFD")
+                        .replace(/[\u0300-\u036f]/g, "");
+
+  spots.forEach(s => {
+    const marker = markers[s.nom];
+    const spotNameNormalized = s.nom.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const match =
+      (country === "" || s.pays.toLowerCase() === country) &&
+      (canton === "" || s.canton.toLowerCase() === canton) &&
+      (city === "" || s.ville.toLowerCase() === city) &&
+      (difficulty === "" || s.difficulte.toLowerCase() === difficulty) &&
+      (nameFilter === "" || spotNameNormalized.includes(nameFilter));
+
+    if (match) {
+      marker.addTo(map);
+    } else {
+      map.removeLayer(marker);
+      if (polylines[s.nom]) {
+        map.removeLayer(polylines[s.nom]);
+        delete polylines[s.nom];
+      }
     }
+  });
 
-    populateFilters();
+  filterPanel.style.display = 'none';
+});
 
-    // --- Application des filtres ---
-    document.getElementById('applyFilterBtn').addEventListener('click', () => {
-      const country = document.getElementById('filterCountry').value.trim().toLowerCase();
-      const canton = document.getElementById('filterCanton').value.trim().toLowerCase();
-      const city = document.getElementById('filterCity').value.trim().toLowerCase();
-      const difficulty = document.getElementById('filterDifficulty').value.trim().toLowerCase();
+// --- Réinitialisation des filtres ---
+document.getElementById('resetFilterBtn').addEventListener('click', () => {
+  document.getElementById('filterCountry').value = "";
+  document.getElementById('filterCanton').value = "";
+  document.getElementById('filterCity').value = "";
+  document.getElementById('filterDifficulty').value = "";
+  document.getElementById('filterName').value = "";
 
-      const nameFilter = document.getElementById('filterName').value
-                            .trim()
-                            .toLowerCase()
-                            .normalize("NFD")
-                            .replace(/[\u0300-\u036f]/g, "");
+  // Réaffiche tous les spots et polylines
+  spots.forEach(s => {
+    const marker = markers[s.nom];
+    if (!map.hasLayer(marker)) { marker.addTo(map); }
+    if (s.coordinates && !polylines[s.nom]) {
+      const polyline = L.polyline(s.coordinates, { color: getColorByDifficulty(s.difficulte) }).addTo(map);
+      polylines[s.nom] = polyline;
+    }
+  });
 
-      spots.forEach(s => {
-        const marker = markers[s.nom];
-        const spotNameNormalized = s.nom.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        const match =
-          (country === "" || s.pays.toLowerCase() === country) &&
-          (canton === "" || s.canton.toLowerCase() === canton) &&
-          (city === "" || s.ville.toLowerCase() === city) &&
-          (difficulty === "" || s.difficulte.toLowerCase() === difficulty) &&
-          (nameFilter === "" || spotNameNormalized.includes(nameFilter));
+  // Repeuple tous les selects à l'état initial
+  populateFilters();
+});
 
-        if (match) {
-          marker.addTo(map);
-        } else {
-          map.removeLayer(marker);
-          if (polylines[s.nom]) {
-            map.removeLayer(polylines[s.nom]);
-            delete polylines[s.nom];
-          }
-        }
-      });
-
-      filterPanel.style.display = 'none';
-    });
-
-    // --- Réinitialisation des filtres ---
-    document.getElementById('resetFilterBtn').addEventListener('click', () => {
-      document.getElementById('filterCountry').value = "";
-      document.getElementById('filterCanton').value = "";
-      document.getElementById('filterCity').value = "";
-      document.getElementById('filterDifficulty').value = "";
-      document.getElementById('filterName').value = "";
-
-      spots.forEach(s => {
-        const marker = markers[s.nom];
-        if (!map.hasLayer(marker)) { marker.addTo(map); }
-        if (s.coordinates && !polylines[s.nom]) {
-          const polyline = L.polyline(s.coordinates, { color: getColorByDifficulty(s.difficulte) }).addTo(map);
-          polylines[s.nom] = polyline;
-        }
-      });
-    });
 
     // --- Envoyer un spot ---
     document.addEventListener('DOMContentLoaded', function() {
@@ -1576,6 +1608,7 @@ Commentaire: ${commentaire}
   </script>
 </body>
 </html>
+
 
 
 
