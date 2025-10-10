@@ -1476,7 +1476,7 @@ function populateFilters() {
 
   // Fonction pour remplir un select avec un ensemble
   function fillSelect(select, values) {
-    select.innerHTML = '<option value="">Tous</option>';
+    select.innerHTML = '<option value="">All</option>';
     Array.from(values).sort().forEach(v => {
       const o = document.createElement('option');
       o.value = v;
@@ -1625,6 +1625,7 @@ Commentaire: ${commentaire}
   </script>
 </body>
 </html>
+
 
 
 
