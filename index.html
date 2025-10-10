@@ -54,25 +54,7 @@
     }
 
     /* Bouton Info flottant */
-  #infoBtn {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background-color: #0078d7; /* bleu simple */
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 8px 12px;
-    font-size: 18px;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    z-index: 1000;
-  }
-  #infoBtn:hover {
-    background-color: #005fa3;
-  }
-
-  #infoPanel {
+     #infoPanel {
     display: none;
     position: fixed;
     top: 0;
@@ -102,14 +84,6 @@
     margin-top: 10px;
   }
   #closeInfoBtn:hover { background-color: #005fa3; }
-  </style>
-</head>
-<body>
-  <div id="buttonPanel">
-    <button id="filterBtn">Filtrer</button>
-    <button id="addSpotBtn">Ajouter un spot</button>
-    <button id="helpBtn">Help</button>
-  </div>
 
   <div id="filterPanel">
     <label>Pays: <select id="filterCountry"><option value="">Tous</option></select></label>
@@ -159,7 +133,6 @@
   </div>
 
   <!-- Bouton Info -->
- <button id="infoBtn">ℹ️</button>
 <div id="infoPanel">
   <div id="infoContent">
     <h2>Informations</h2>
@@ -1522,4 +1495,5 @@
   </script>
 </body>
 </html>
+
 
