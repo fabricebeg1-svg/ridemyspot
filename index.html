@@ -81,35 +81,38 @@
     <button id="resetFilterBtn" class="filter-btn" style="margin-top: 8px;">Réinitialiser</button>
   </div>
 
-  <div id="addSpotPanel">
-    <label>Nom: <input type="text" id="spotName"></label>
-    <label>Lien Google Maps du tracé: <input type="text" id="spotCoords" placeholder="https://www.google.com/maps/..."></label>
-    <label>Ville: <input type="text" id="spotCity"></label>
-    <label>Canton/Région: <input type="text" id="spotCanton"></label>
-    <label>Pays: <input type="text" id="spotCountry"></label>
-    <label>Commentaire: <input type="text" id="spotCommentaire" placeholder="Votre commentaire ici"></label>
-    <label>Difficulté: 
-      <select id="spotDifficulty">
-        <option value="bleu">Facile</option>
-        <option value="rouge">Moyen</option>
-        <option value="noir">Difficile</option>
-      </select>
-    </label>
-    <label>Bitume (1-5): 
-      <select id="spotBitume">
-        <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
-      </select>
-    </label>
-    <label>Trafic (1-5): 
-      <select id="spotTraffic">
-        <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
-      </select>
-    </label>
-    <label>Vidéo (URL): <input type="text" id="spotVideo"></label>
-    <button id="spotSendBtn">Envoyer</button>
+ <div id="addSpotPanel">
+  <div id="addSpotInfo" style="background:#f0f0f0; padding:5px 10px; margin-bottom:10px; border-radius:3px; font-weight:bold;">
+    Merci de lire les informations avant de remplir le formulaire.
   </div>
 
-  <div id="map"></div>
+  <label>Nom: <input type="text" id="spotName"></label>
+  <label>Lien Google Maps du tracé: <input type="text" id="spotCoords" placeholder="https://www.google.com/maps/..."></label>
+  <label>Ville: <input type="text" id="spotCity"></label>
+  <label>Canton/Région: <input type="text" id="spotCanton"></label>
+  <label>Pays: <input type="text" id="spotCountry"></label>
+  <label>Commentaire: <input type="text" id="spotCommentaire" placeholder="Votre commentaire ici"></label>
+  <label>Difficulté: 
+    <select id="spotDifficulty">
+      <option value="bleu">Facile</option>
+      <option value="rouge">Moyen</option>
+      <option value="noir">Difficile</option>
+    </select>
+  </label>
+  <label>Bitume (1-5): 
+    <select id="spotBitume">
+      <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+    </select>
+  </label>
+  <label>Trafic (1-5): 
+    <select id="spotTraffic">
+      <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+    </select>
+  </label>
+  <label>Vidéo (URL): <input type="text" id="spotVideo"></label>
+  <button id="spotSendBtn">Envoyer</button>
+</div>
+
 
 <!-- Bouton Info en bas à droite -->
 <div id="infoButton" style="
@@ -1563,4 +1566,5 @@ Commentaire: ${commentaire}
   </script>
 </body>
 </html>
+
 
