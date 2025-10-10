@@ -61,6 +61,7 @@
     <button id="filterBtn">Filtrer</button>
     <button id="addSpotBtn">Ajouter un spot</button>
     <button id="helpBtn">Help</button>
+    <button id="infoBtn">ℹ️ Infos</button>
   </div>
 
   <div id="filterPanel">
@@ -110,6 +111,19 @@
     <label>Vidéo (URL): <input type="text" id="spotVideo"></label>
     <button id="spotSendBtn">Envoyer</button>
   </div>
+  
+<!-- Fenêtre d'infos -->
+  <div id="infoPanel">
+  <div id="infoContent">
+    <h2>Informations</h2>
+    <p>
+      Ici, tu peux mettre le texte que tu veux : description du site, comment ajouter un spot,
+      lien vers ton Instagram, ou toute autre info utile.
+    </p>
+    <button id="closeInfoBtn">Fermer</button>
+  </div>
+</div>
+  
 
   <div id="map"></div>
 
@@ -1579,6 +1593,8 @@ document.getElementById('resetFilterBtn').addEventListener('click', () => {
   document.getElementById('filterPanel').style.display = 'none';
 });
 
+
+
 // --- Envoyer un spot ---
 document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('spotSendBtn').addEventListener('click', () => {
@@ -1615,9 +1631,82 @@ Commentaire: ${commentaire}
   });
 });
 
+/* Bouton flottant Infos */
+#infoBtn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #0078d7;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  transition: background-color 0.2s;
+  z-index: 1000;
+}
+
+#infoBtn:hover {
+  background-color: #005fa3;
+}
+
+/* Fenêtre d'infos */
+#infoPanel {
+  display: none; /* caché par défaut */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 2000;
+}
+
+#infoContent {
+  background: white;
+  color: #333;
+  max-width: 500px;
+  margin: 100px auto;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+#infoContent h2 {
+  margin-top: 0;
+}
+
+#closeInfoBtn {
+  background-color: #0078d7;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+#closeInfoBtn:hover {
+  background-color: #005fa3;
+}
+// --- Bouton Infos ---
+document.getElementById("infoBtn").addEventListener("click", () => {
+  document.getElementById("infoPanel").style.display = "block";
+});
+
+document.getElementById("closeInfoBtn").addEventListener("click", () => {
+  document.getElementById("infoPanel").style.display = "none";
+});
+
+
+
+
   </script>
 </body>
 </html>
+
 
 
 
