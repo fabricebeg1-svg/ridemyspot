@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -31,7 +29,7 @@
     /* Fenêtres filtrage et ajout spot */
     #filterPanel, #addSpotPanel {
       position: absolute;
-      top: 50px; /* décalé pour ne pas chevaucher les boutons */
+      top: 50px;
       right: 10px;
       z-index: 1000;
       background: white;
@@ -54,6 +52,56 @@
       border: 1px solid #ccc;
       padding: 5px 10px;
     }
+
+    /* Bouton Info flottant */
+    #infoBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #0078d7;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 16px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      transition: background-color 0.2s;
+      z-index: 1000;
+    }
+    #infoBtn:hover { background-color: #005fa3; }
+
+    /* Fenêtre d'infos */
+    #infoPanel {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 2000;
+    }
+    #infoContent {
+      background: white;
+      color: #333;
+      max-width: 500px;
+      margin: 100px auto;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    #infoContent h2 { margin-top: 0; }
+    #closeInfoBtn {
+      background-color: #0078d7;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    #closeInfoBtn:hover { background-color: #005fa3; }
   </style>
 </head>
 <body>
@@ -61,7 +109,6 @@
     <button id="filterBtn">Filtrer</button>
     <button id="addSpotBtn">Ajouter un spot</button>
     <button id="helpBtn">Help</button>
-    <button id="infoBtn">ℹ️ Infos</button>
   </div>
 
   <div id="filterPanel">
@@ -77,9 +124,8 @@
       </select>
     </label>
     <label>Nom du spot :
-  <input type="text" id="filterName" placeholder="ex: Béthusy ou bethusy">
-</label>
-
+      <input type="text" id="filterName" placeholder="ex: Béthusy ou bethusy">
+    </label>
     <button id="applyFilterBtn">Appliquer</button>
     <button id="resetFilterBtn" class="filter-btn" style="margin-top: 8px;">Réinitialiser</button>
   </div>
@@ -111,19 +157,16 @@
     <label>Vidéo (URL): <input type="text" id="spotVideo"></label>
     <button id="spotSendBtn">Envoyer</button>
   </div>
-  
-<!-- Fenêtre d'infos -->
+
+  <!-- Bouton Info -->
+  <button id="infoBtn">ℹ️ Infos</button>
   <div id="infoPanel">
-  <div id="infoContent">
-    <h2>Informations</h2>
-    <p>
-      Ici, tu peux mettre le texte que tu veux : description du site, comment ajouter un spot,
-      lien vers ton Instagram, ou toute autre info utile.
-    </p>
-    <button id="closeInfoBtn">Fermer</button>
+    <div id="infoContent">
+      <h2>Informations</h2>
+      <p>Ici, tu peux mettre le texte que tu veux : description du site, comment ajouter un spot, liens utiles...</p>
+      <button id="closeInfoBtn">Fermer</button>
+    </div>
   </div>
-</div>
-  
 
   <div id="map"></div>
 
@@ -1283,7 +1326,7 @@
     [46.50651, 6.64875]
   ]
 },
-{
+  {
   nom: "Croix-Rouge",
   lat: 46.5210155,
   lng: 6.6222976,
@@ -1314,406 +1357,168 @@
     [46.51979, 6.61893],
     [46.51966, 6.61855]
   ]
-},
-  {
-  nom: "Lémania",
-  lat: 46.519910,
-  lng: 6.627611,
-  difficulte: "noir",
-  bitume: 2,
-  trafic: 1,
-  longueur: "130 m",
-  penteMoyenne: "18 %",
-  video: "",
-  lien: "https://maps.app.goo.gl/XbTTUWg4uXi6QN7t6",
-  ville: "Lausanne",
-  canton: "VD",
-  pays: "Suisse",
-  commentaire: "Pente bien raide, goudron assez dégueu et obligation de s'arrêter à la fin",
-  coordinates: [
-    [46.51993, 6.62759],
-    [46.51963, 6.62748],
-    [46.51959, 6.62747],
-    [46.51919, 6.62730],
-    [46.51913, 6.62727],
-    [46.51882, 6.62711]
-  ]
 }
+    ];
 
-];
+    const polylines = {};
+    const markers = {};
 
-   const polylines = {};
-const markers = {};
+    function getColorByDifficulty(d) {
+      return d === "bleu" ? "#007bff" : d === "rouge" ? "#ff0000" : "#000000";
+    }
 
-function addSpotMarker(spot) {
-  const emoji = spot.difficulte === "bleu" ? "🔵" : spot.difficulte === "rouge" ? "🔴" : "⚫";
+    function addSpotMarker(spot) {
+      const emoji = spot.difficulte === "bleu" ? "🔵" : spot.difficulte === "rouge" ? "🔴" : "⚫";
 
-  const marker = L.marker(spot.coordinates[0], {
-    icon: L.divIcon({ className: 'emoji-marker', html: emoji, iconSize: [24, 24] })
-  }).addTo(map);
+      const marker = L.marker(spot.coordinates[0], {
+        icon: L.divIcon({ className: 'emoji-marker', html: emoji, iconSize: [24, 24] })
+      }).addTo(map);
 
-  // Contenu principal du popup
-  marker.bindPopup(`
-    <b>${spot.nom}</b><br>
-    Bitume: ${'⭐'.repeat(spot.bitume)}<br>
-    Trafic: ${'🚗'.repeat(spot.trafic)}<br>
-    Longueur: ${spot.longueur || 'N/A'}<br>
-    Pente moyenne: ${spot.penteMoyenne || 'N/A'}<br>
-    <button class="toggle-comment">Commentaire</button>
-    <div class="comment-text" style="display:none; margin-top:5px;">
-      ${spot.commentaire ? `<i>${spot.commentaire}</i>` : '<i>Aucun commentaire</i>'}
-    </div>
-    <br>
-    <a href="${spot.video}" target="_blank">Vidéo</a><br>
-    <a href="${spot.lien}" target="_blank">Départ Google Maps</a>
-  `);
+      marker.bindPopup(`
+        <b>${spot.nom}</b><br>
+        Bitume: ${'⭐'.repeat(spot.bitume)}<br>
+        Trafic: ${'🚗'.repeat(spot.trafic)}<br>
+        Longueur: ${spot.longueur || 'N/A'}<br>
+        Pente moyenne: ${spot.penteMoyenne || 'N/A'}<br>
+        <button class="toggle-comment">Commentaire</button>
+        <div class="comment-text" style="display:none; margin-top:5px;">
+          ${spot.commentaire ? `<i>${spot.commentaire}</i>` : '<i>Aucun commentaire</i>'}
+        </div>
+        <br>
+        <a href="${spot.video}" target="_blank">Vidéo</a><br>
+        <a href="${spot.lien}" target="_blank">Départ Google Maps</a>
+      `);
 
-  // Quand le popup s’ouvre, on prépare le bouton commentaire
-  marker.on('popupopen', function (e) {
-    const popupNode = e.popup.getElement();
-    const toggleBtn = popupNode.querySelector('.toggle-comment');
-    const commentDiv = popupNode.querySelector('.comment-text');
-
-    if (toggleBtn && commentDiv) {
-      toggleBtn.addEventListener('click', function () {
-        if (commentDiv.style.display === 'none') {
-          commentDiv.style.display = 'block';
-        } else {
-          commentDiv.style.display = 'none';
+      marker.on('popupopen', function (e) {
+        const popupNode = e.popup.getElement();
+        const toggleBtn = popupNode.querySelector('.toggle-comment');
+        const commentDiv = popupNode.querySelector('.comment-text');
+        if (toggleBtn && commentDiv) {
+          toggleBtn.addEventListener('click', function () {
+            commentDiv.style.display = commentDiv.style.display === 'none' ? 'block' : 'none';
+          });
         }
       });
+
+      marker.on('click', () => {
+        if (polylines[spot.nom]) {
+          map.removeLayer(polylines[spot.nom]);
+          delete polylines[spot.nom];
+        } else {
+          polylines[spot.nom] = L.polyline(spot.coordinates, { color: getColorByDifficulty(spot.difficulte), weight: 4 }).addTo(map);
+        }
+      });
+
+      markers[spot.nom] = marker;
     }
-  });
 
-  // Gestion du clic sur le marker pour afficher/masquer la polyline
-  marker.on('click', () => {
-    if (polylines[spot.nom]) {
-      map.removeLayer(polylines[spot.nom]);
-      delete polylines[spot.nom];
-    } else {
-      const color =
-        spot.difficulte === "bleu" ? "#007bff" :
-        spot.difficulte === "rouge" ? "#ff0000" :
-        "#000000";
-      polylines[spot.nom] = L.polyline(spot.coordinates, { color: color, weight: 4 }).addTo(map);
-    }
-  });
+    spots.forEach(addSpotMarker);
 
-  markers[spot.nom] = marker;
-}
+    // Centrer carte sur tous les spots
+    const allCoords = [];
+    spots.forEach(s => {
+      if (s.coordinates && s.coordinates.length > 0) allCoords.push(...s.coordinates);
+    });
+    if (allCoords.length) map.fitBounds(allCoords);
 
-spots.forEach(addSpotMarker);
+    // Localisation en temps réel
+    map.locate({ setView: false, watch: true, maxZoom: 16 });
+    const userMarker = L.marker([0,0], {
+      icon: L.divIcon({ className: 'emoji-marker', html: "📍", iconSize: [24,24] })
+    }).addTo(map);
+    map.on("locationfound", e => userMarker.setLatLng(e.latlng));
 
-
-    // --- Centrer la carte sur tous les spots ---
-const allCoords = [];
-spots.forEach(s => {
-  if (s.coordinates && s.coordinates.length > 0) {
-    allCoords.push(...s.coordinates);
-  } else if (s.polyline && s.polyline.length > 0) {
-    allCoords.push(...s.polyline);
-  } else if (s.lat && s.lng) {
-    allCoords.push([s.lat, s.lng]);
-  }
-});
-
-if (allCoords.length > 0) {
-  map.fitBounds(allCoords);
-}
-
-    // --- Localisation en temps réel ---
-map.locate({ setView: false, watch: true, maxZoom: 16 });
-
-const userMarker = L.marker([0,0], {
-  icon: L.divIcon({ className: 'emoji-marker', html: "📍", iconSize: [24,24] })
-}).addTo(map);
-
-map.on("locationfound", e => {
-  userMarker.setLatLng(e.latlng);
-});
-
-
-
-    // --- Boutons ---
+    // Boutons
     const filterPanel = document.getElementById('filterPanel');
     const addSpotPanel = document.getElementById('addSpotPanel');
 
     document.getElementById('filterBtn').addEventListener('click', () => {
       filterPanel.style.display = filterPanel.style.display === 'none' ? 'block' : 'none';
     });
-
     document.getElementById('addSpotBtn').addEventListener('click', () => {
       addSpotPanel.style.display = addSpotPanel.style.display === 'none' ? 'block' : 'none';
     });
-
     document.getElementById('helpBtn').addEventListener('click', () => {
       window.location.href = 'mailto:fabricebeg1@gmail.com?subject=Aide Freebord';
     });
 
-// --- Filtres dynamiques ---
-function populateFilters() {
-  const countrySet = new Set();
-  const cantonMap = new Map(); // Canton → Set de villes
+    // Filtres dynamiques
+    function populateFilters() {
+      const countrySet = new Set();
+      const cantonSet = new Set();
+      const citySet = new Set();
+      spots.forEach(s => { countrySet.add(s.pays); cantonSet.add(s.canton); citySet.add(s.ville); });
 
-  spots.forEach(s => {
-    countrySet.add(s.pays);
+      const fc = document.getElementById('filterCountry');
+      const fct = document.getElementById('filterCanton');
+      const fci = document.getElementById('filterCity');
 
-    if (!cantonMap.has(s.canton)) {
-      cantonMap.set(s.canton, new Set());
+      fc.innerHTML = '<option value="">Tous</option>';
+      fct.innerHTML = '<option value="">Tous</option>';
+      fci.innerHTML = '<option value="">Toutes</option>';
+
+      countrySet.forEach(c => { const o = document.createElement('option'); o.value=c;o.text=c;fc.add(o); });
+      cantonSet.forEach(c => { const o = document.createElement('option'); o.value=c;o.text=c;fct.add(o); });
+      citySet.forEach(c => { const o = document.createElement('option'); o.value=c;o.text=c;fci.add(o); });
     }
-    cantonMap.get(s.canton).add(s.ville);
-  });
 
-  const fc = document.getElementById('filterCountry');
-  const fct = document.getElementById('filterCanton');
-  const fci = document.getElementById('filterCity');
+    populateFilters();
 
-  // Réinitialiser les listes
-  fc.innerHTML = '<option value="">Tous les pays</option>';
-  fct.innerHTML = '<option value="">Tous les cantons</option>';
-  fci.innerHTML = '<option value="">Toutes les villes</option>';
+    document.getElementById('applyFilterBtn').addEventListener('click', () => {
+      const country = document.getElementById('filterCountry').value.trim().toLowerCase();
+      const canton = document.getElementById('filterCanton').value.trim().toLowerCase();
+      const city = document.getElementById('filterCity').value.trim().toLowerCase();
+      const difficulty = document.getElementById('filterDifficulty').value.trim().toLowerCase();
+      const nameFilter = document.getElementById('filterName').value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-  // Peupler pays (triés)
-  Array.from(countrySet).sort().forEach(c => {
-    const o = document.createElement('option');
-    o.value = c;
-    o.text = c;
-    fc.add(o);
-  });
-
-  // Peupler cantons (triés)
-  Array.from(cantonMap.keys()).sort().forEach(canton => {
-    const o = document.createElement('option');
-    o.value = canton;
-    o.text = canton;
-    fct.add(o);
-  });
-
-  // Peupler toutes les villes au départ (triées)
-  const allCities = new Set();
-  cantonMap.forEach(set => set.forEach(v => allCities.add(v)));
-  Array.from(allCities).sort().forEach(ville => {
-    const o = document.createElement('option');
-    o.value = ville;
-    o.text = ville;
-    fci.add(o);
-  });
-
-  // --- Événement : quand on change de canton, filtrer les villes ---
-  fct.addEventListener('change', () => {
-    const selectedCanton = fct.value;
-    fci.innerHTML = '<option value="">Toutes les villes</option>'; // reset
-
-    if (selectedCanton && cantonMap.has(selectedCanton)) {
-      const cities = Array.from(cantonMap.get(selectedCanton)).sort();
-      cities.forEach(ville => {
-        const o = document.createElement('option');
-        o.value = ville;
-        o.text = ville;
-        fci.add(o);
+      spots.forEach(s => {
+        const marker = markers[s.nom];
+        const spotNameNormalized = s.nom.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const match = (country===""||s.pays.toLowerCase()===country) &&
+                      (canton===""||s.canton.toLowerCase()===canton) &&
+                      (city===""||s.ville.toLowerCase()===city) &&
+                      (difficulty===""||s.difficulte.toLowerCase()===difficulty) &&
+                      (nameFilter===""||spotNameNormalized.includes(nameFilter));
+        if(match){ marker.addTo(map); } else { map.removeLayer(marker); if(polylines[s.nom]){ map.removeLayer(polylines[s.nom]); delete polylines[s.nom]; } }
       });
-    } else {
-      // Si aucun canton sélectionné, toutes les villes triées
-      const allCities = new Set();
-      cantonMap.forEach(set => set.forEach(v => allCities.add(v)));
-      Array.from(allCities).sort().forEach(ville => {
-        const o = document.createElement('option');
-        o.value = ville;
-        o.text = ville;
-        fci.add(o);
-      });
-    }
-  });
-}
+      filterPanel.style.display='none';
+    });
 
-populateFilters();
+    document.getElementById('resetFilterBtn').addEventListener('click', () => {
+      document.getElementById('filterCountry').value="";
+      document.getElementById('filterCanton').value="";
+      document.getElementById('filterCity').value="";
+      document.getElementById('filterDifficulty').value="";
+      document.getElementById('filterName').value="";
+      spots.forEach(s => { const marker = markers[s.nom]; if(!map.hasLayer(marker)) marker.addTo(map); });
+      populateFilters();
+      filterPanel.style.display='none';
+    });
 
-// --- Application des filtres ---
-document.getElementById('applyFilterBtn').addEventListener('click', () => {
-  const country = document.getElementById('filterCountry').value.trim().toLowerCase();
-  const canton = document.getElementById('filterCanton').value.trim().toLowerCase();
-  const city = document.getElementById('filterCity').value.trim().toLowerCase();
-  const difficulty = document.getElementById('filterDifficulty').value.trim().toLowerCase();
+    // Envoi spot par mail
+    document.getElementById('spotSendBtn').addEventListener('click', () => {
+      const nom = document.getElementById('spotName').value.trim();
+      const coords = document.getElementById('spotCoords').value.trim();
+      const ville = document.getElementById('spotCity').value.trim();
+      const canton = document.getElementById('spotCanton').value.trim();
+      const pays = document.getElementById('spotCountry').value.trim();
+      const difficulte = document.getElementById('spotDifficulty').value.trim();
+      const bitume = document.getElementById('spotBitume').value.trim();
+      const trafic = document.getElementById('spotTraffic').value.trim();
+      const video = document.getElementById('spotVideo').value.trim();
+      const commentaire = document.getElementById('spotCommentaire').value.trim()||"Aucun";
+      const mailBody = `Nom: ${nom} | Lien Google Maps: ${coords} | Ville: ${ville} | Canton/Région: ${canton} | Pays: ${pays} | Difficulté: ${difficulte} | Bitume: ${bitume} | Trafic: ${trafic} | Vidéo: ${video} | Commentaire: ${commentaire}`.replace(/\n/g,'').trim();
+      window.location.href = `mailto:fabricebeg1@gmail.com?subject=${encodeURIComponent('Nouveau Spot')}&body=${encodeURIComponent(mailBody)}`;
+    });
 
-  // Normalisation pour les accents et majuscules
-  const nameFilter = document.getElementById('filterName').value
-                        .trim()
-                        .toLowerCase()
-                        .normalize("NFD")
-                        .replace(/[\u0300-\u036f]/g, "");
-
-  spots.forEach(s => {
-    const marker = markers[s.nom];
-    const spotNameNormalized = s.nom
-                                .toLowerCase()
-                                .normalize("NFD")
-                                .replace(/[\u0300-\u036f]/g, "");
-
-    const match =
-      (country === "" || s.pays.toLowerCase() === country) &&
-      (canton === "" || s.canton.toLowerCase() === canton) &&
-      (city === "" || s.ville.toLowerCase() === city) &&
-      (difficulty === "" || s.difficulte.toLowerCase() === difficulty) &&
-      (nameFilter === "" || spotNameNormalized.includes(nameFilter));
-
-    if (match) {
-      marker.addTo(map);
-    } else {
-      map.removeLayer(marker);
-      if (polylines[s.nom]) {
-        map.removeLayer(polylines[s.nom]);
-        delete polylines[s.nom];
-      }
-    }
-  });
-
-  document.getElementById('filterPanel').style.display = 'none';
-});
-
-// --- Réinitialiser les filtres ---
-document.getElementById('resetFilterBtn').addEventListener('click', () => {
-  document.getElementById('filterCountry').value = "";
-  document.getElementById('filterCanton').value = "";
-  document.getElementById('filterCity').value = "";
-  document.getElementById('filterDifficulty').value = "";
-  document.getElementById('filterName').value = "";
-
-  // Réafficher tous les markers
-  spots.forEach(s => {
-    const marker = markers[s.nom];
-    if (!map.hasLayer(marker)) {
-      marker.addTo(map);
-    }
-  });
-
-  // Réinitialiser complètement les listes déroulantes triées
-  populateFilters();
-
-  // Fermer le panneau (optionnel)
-  document.getElementById('filterPanel').style.display = 'none';
-});
-
-
-
-// --- Envoyer un spot ---
-document.addEventListener('DOMContentLoaded', function() {
-  document.getElementById('spotSendBtn').addEventListener('click', () => {
-    const nom = document.getElementById('spotName').value.trim();
-    const coords = document.getElementById('spotCoords').value.trim();
-    const ville = document.getElementById('spotCity').value.trim();
-    const canton = document.getElementById('spotCanton').value.trim();
-    const pays = document.getElementById('spotCountry').value.trim();
-    const difficulte = document.getElementById('spotDifficulty').value.trim();
-    const bitume = document.getElementById('spotBitume').value.trim();
-    const trafic = document.getElementById('spotTraffic').value.trim();
-    const video = document.getElementById('spotVideo').value.trim();
-    const commentaire = document.getElementById('spotCommentaire').value.trim() || "Aucun";
-
-    // Corps du mail compact (évite les retours à la ligne qui causent le troncage)
-    const mailBody = `
-Nom: ${nom} | 
-Lien Google Maps: ${coords} | 
-Ville: ${ville} | 
-Canton/Région: ${canton} | 
-Pays: ${pays} | 
-Difficulté: ${difficulte} | 
-Bitume: ${bitume} | 
-Trafic: ${trafic} | 
-Vidéo: ${video} | 
-Commentaire: ${commentaire}
-    `.replace(/\n/g, '').trim(); // Supprime tout retour à la ligne réel
-
-    // Construction du mailto avec encodage propre
-    const mailtoLink = `mailto:fabricebeg1@gmail.com?subject=${encodeURIComponent('Nouveau Spot')}&body=${encodeURIComponent(mailBody)}`;
-
-    // Ouverture du client mail
-    window.location.href = mailtoLink;
-  });
-});
-
-/* Bouton flottant Infos */
-#infoBtn {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background-color: #0078d7;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 16px;
-  font-size: 16px;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  transition: background-color 0.2s;
-  z-index: 1000;
-}
-
-#infoBtn:hover {
-  background-color: #005fa3;
-}
-
-/* Fenêtre d'infos */
-#infoPanel {
-  display: none; /* caché par défaut */
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.5);
-  z-index: 2000;
-}
-
-#infoContent {
-  background: white;
-  color: #333;
-  max-width: 500px;
-  margin: 100px auto;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-}
-
-#infoContent h2 {
-  margin-top: 0;
-}
-
-#closeInfoBtn {
-  background-color: #0078d7;
-  color: white;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-top: 10px;
-}
-
-#closeInfoBtn:hover {
-  background-color: #005fa3;
-}
-// --- Bouton Infos ---
-document.getElementById("infoBtn").addEventListener("click", () => {
-  document.getElementById("infoPanel").style.display = "block";
-});
-
-document.getElementById("closeInfoBtn").addEventListener("click", () => {
-  document.getElementById("infoPanel").style.display = "none";
-});
-
-
-
+    // --- Bouton Infos ---
+    document.getElementById("infoBtn").addEventListener("click", () => {
+      document.getElementById("infoPanel").style.display = "block";
+    });
+    document.getElementById("closeInfoBtn").addEventListener("click", () => {
+      document.getElementById("infoPanel").style.display = "none";
+    });
 
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
