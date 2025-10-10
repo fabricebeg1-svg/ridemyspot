@@ -57,15 +57,15 @@
 <body>
   <div id="buttonPanel">
     <button id="filterBtn">Filter</button>
-    <button id="addSpotBtn">Ajouter un spot</button>
+    <button id="addSpotBtn">Add a Spot</button>
     <button id="helpBtn">Help</button>
   </div>
 
   <div id="filterPanel">
-    <label>Pays: <select id="filterCountry"><option value="">Tous</option></select></label>
-    <label>Canton/Région: <select id="filterCanton"><option value="">Tous</option></select></label>
-    <label>Ville: <select id="filterCity"><option value="">Toutes</option></select></label>
-    <label>Difficulté: 
+    <label>Country: <select id="filterCountry"><option value="">Tous</option></select></label>
+    <label>State: <select id="filterCanton"><option value="">Tous</option></select></label>
+    <label>City: <select id="filterCity"><option value="">Toutes</option></select></label>
+    <label>Difficulty: 
       <select id="filterDifficulty">
         <option value="">Toutes</option>
         <option value="bleu">Facile</option>
@@ -73,7 +73,7 @@
         <option value="noir">Difficile</option>
       </select>
     </label>
-    <label>Nom du spot :
+    <label>Spot Name :
       <input type="text" id="filterName" placeholder="ex: Béthusy ou bethusy">
     </label>
 
@@ -83,23 +83,23 @@
 
  <div id="addSpotPanel">
   <div id="addSpotInfo" style="background:#f0f0f0; padding:5px 10px; margin-bottom:10px; border-radius:3px; font-weight:bold;">
-    Merci de lire les informations avant de remplir le formulaire.
+    Please read the information before filling out the form.
   </div>
 
-  <label>Nom: <input type="text" id="spotName"></label>
-  <label>Lien Google Maps du tracé: <input type="text" id="spotCoords" placeholder="https://www.google.com/maps/..."></label>
-  <label>Ville: <input type="text" id="spotCity"></label>
-  <label>Canton/Région: <input type="text" id="spotCanton"></label>
-  <label>Pays: <input type="text" id="spotCountry"></label>
-  <label>Commentaire: <input type="text" id="spotCommentaire" placeholder="Votre commentaire ici"></label>
-  <label>Difficulté: 
+  <label>Spot Name: <input type="text" id="spotName"></label>
+  <label>Google Maps link for the route: <input type="text" id="spotCoords" placeholder="https://www.google.com/maps/..."></label>
+  <label>City: <input type="text" id="spotCity"></label>
+  <label>State: <input type="text" id="spotCanton"></label>
+  <label>Country: <input type="text" id="spotCountry"></label>
+  <label>Comment: <input type="text" id="spotCommentaire" placeholder="Votre commentaire ici"></label>
+  <label>Difficulty: 
     <select id="spotDifficulty">
       <option value="bleu">Facile</option>
       <option value="rouge">Moyen</option>
       <option value="noir">Difficile</option>
     </select>
   </label>
-  <label>Bitume (1-5): 
+  <label>Asphalt (1-5): 
     <select id="spotBitume">
       <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
     </select>
@@ -109,7 +109,7 @@
       <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
     </select>
   </label>
-  <label>Vidéo (URL): <input type="text" id="spotVideo"></label>
+  <label>Video (URL): <input type="text" id="spotVideo"></label>
   <button id="spotSendBtn">Envoyer</button>
 </div>
 
@@ -167,15 +167,16 @@
       <button id="closeInfoPopup" style="background: none; border: none; font-weight: bold; cursor: pointer;">✖</button>
     </div>
     <div id="infoText">
-      Pour l'ajout d'un spot :<br>
-      <br>
-      - Merci mettre uniquement le tracé du spot et pas le chemin pour s'y rendre. Dans les informations des spots, vous trouverez toujours un lien google Map pour vous y rendre.<br>
+   For adding a spot:<br>
 <br>
-      Général : <br>
-      <br>
-      La difficulté et la qualité du bitume des spots sont des appréciations peronnelles selon le niveau, le ressenti et la discipline (Roller, Freebord, Longboard, etc, etc, ...) de la personne qui a soumis le spot.<br>
+- Please include only the track of the spot, not the route to get there. In each spot’s info, you’ll always find a Google Maps link to reach the location.<br>
 <br>
-                Le trafic est également une information qui peut varier selon l'heure et le jour où vous allez le rider.<br>
+General info:<br>
+<br>
+The difficulty and road quality are personal impressions based on the rider’s level, feeling, and discipline (Roller, Freebord, Longboard, etc.).<br>
+<br>
+Traffic may also vary depending on the time and day you decide to ride.<br>
+
     </div>
   </div>
 
@@ -201,7 +202,7 @@
         ville: "Lausanne",
         canton: "VD",
         pays: "Suisse",
-        commentaire: "Route large, béton incroyable",
+        commentaire: "Wide road, super smooth asphalt",
         coordinates: [
           [46.51395,6.61827],[46.5139,6.61824],[46.51385,6.61822],[46.51332,6.61796],
           [46.51232,6.61746],[46.512,6.61732],[46.51192,6.61724],[46.51191,6.61723],
@@ -221,7 +222,7 @@
     ville: "Lausanne",
     canton: "VD",
     pays: "Suisse",
-    commentaire: "Route étroite, très raide avec goudron changeant",
+    commentaire: "Narrow and super steep road, changing asphalt — ride with care",
     coordinates:[[46.5140863,6.6395701],[46.5139238,6.6395057],[46.5133221,6.6394252],[46.5130747,6.6393823],[46.5127831,6.6393233],[46.5124914,6.6392804]]
   },
   {
@@ -237,7 +238,7 @@
     ville: "Lausanne",
     canton: "VD",
     pays: "Suisse",
-    commentaire: "Route tranquille avec quelques dos d'âne, faire attention aux 2 priorités de droite et après la deuxième, à la sortie du parking souterrain sur la droite",
+    commentaire: "Chill ride with a few speed-bumps — watch out for two right-hand priorities, and after the second one, there’s an underground parking exit on the right.",
   coordinates:[[46.5310463,6.6461827],[46.5300129,6.6461398],[46.5291641,6.6454854],[46.5284481,6.6452493],[46.5276288,6.6451635],[46.5262174,6.6449648],[46.5250363,6.645351],[46.5237519,6.6454369],[46.5223493,6.6460806],[46.5217439,6.6464668]]
   },
   {
@@ -253,7 +254,7 @@
     ville: "Pully",
     canton: "VD",
     pays: "Suisse",
-    commentaire: "Spot mythique, pente ultra raide, virage de dingue mais attention au trafic",
+    commentaire: "Legendary spot — ultra-steep with insane turns, but watch out for traffic!",
     coordinates:[[46.53165,6.67598],[46.53152,6.67581],[46.53145,6.6757],[46.53143,6.67567],[46.53139,6.67562],[46.5313,6.67549],[46.53126,6.67544],[46.53118,6.67532],[46.53114,6.67527],[46.53109,6.67524],[46.53103,6.67521],[46.53099,6.6752],[46.53094,6.67518],[46.53081,6.67516],[46.53078,6.67515],[46.53062,6.6751],[46.53048,6.67507],[46.53043,6.67508],[46.53037,6.67509],[46.53028,6.67512],[46.53025,6.67514],[46.53001,6.67522],[46.5299,6.67525],[46.52982,6.67527],[46.52978,6.67526],[46.52976,6.67524],[46.52975,6.67521],[46.52972,6.67515],[46.52968,6.67505],[46.52963,6.67496],[46.52962,6.67494],[46.52957,6.67489],[46.52952,6.67487],[46.52949,6.67487],[46.52947,6.67487],[46.5294,6.67489],[46.52934,6.67493],[46.52928,6.67499],[46.52918,6.6751],[46.52916,6.67511],[46.52904,6.67521],[46.529,6.67524],[46.52893,6.67528],[46.52887,6.67529],[46.52883,6.67528],[46.52877,6.67524],[46.52871,6.67518],[46.52866,6.67513],[46.5286,6.67505],[46.52854,6.67496],[46.52851,6.67488],[46.52845,6.67474],[46.52841,6.67462],[46.52834,6.67451],[46.52823,6.67436],[46.52822,6.67435],[46.52807,6.6742],[46.52804,6.67418],[46.52791,6.67407],[46.52779,6.67398],[46.52763,6.67385],[46.5276,6.67382],[46.5275,6.67372],[46.52745,6.67367],[46.52726,6.67345],[46.52717,6.67334],[46.52712,6.67328],[46.52709,6.67323]]
   },
 
@@ -305,7 +306,7 @@
     ville: "Lausanne",
     canton: "VD",
     pays: "Suisse",
-    commentaire: "Spot tranquille partant des croisettes passant par de petites zones à 30 km/h",
+    commentaire: "Chill spot starting from Les Croisettes, cruising through small 30 km/h zones.",
     coordinates:[
       [46.54494,6.65655],[46.54479,6.65652],[46.54463,6.65651],[46.54446,6.65651],[46.54422,6.65652],
       [46.54420,6.65652],[46.54416,6.65652],[46.54409,6.65652],[46.54400,6.65649],[46.54390,6.65643],
@@ -359,8 +360,7 @@
     ville: "Lausanne",
     canton: "VD",
     pays: "Suisse",
-    commentaire: "Spot tranquille partant des croisettes passant par de petites zones à 30 km/h",
-    commentaire: "Descente rapide assez facile, attention aux ornières sur la piste de bus. Partir quand le feu pour piéton est vert",
+    commentaire: "Fast and pretty easy downhill — watch out for bumps on the bus lane. Start when the pedestrian light turns green.",
     coordinates:[[46.52171,6.64655],[46.52169,6.64656],[46.52157,6.64629],[46.52148,6.64608],[46.52144,6.64596],[46.52131,6.64556],[46.52131,6.64555],[46.52124,6.64531],[46.52117,6.64498],[46.52114,6.64485],[46.52108,6.64455],[46.52105,6.64415],[46.52103,6.64371],[46.52103,6.64342],[46.52103,6.64338],[46.52104,6.64331],[46.52106,6.64288],[46.52107,6.64275],[46.52110,6.64239],[46.52111,6.64236],[46.52111,6.64230],[46.52112,6.64223],[46.52113,6.64215],[46.52118,6.64169],[46.52119,6.64158],[46.52120,6.64150],[46.52123,6.64123],[46.52125,6.64112],[46.52126,6.64103],[46.52128,6.64093],[46.52130,6.64085],[46.52131,6.64080],[46.52132,6.64076],[46.52133,6.64072],[46.52134,6.64067],[46.52136,6.64061],[46.52138,6.64054],[46.52141,6.64046],[46.52146,6.64039],[46.52154,6.64029],[46.52157,6.64026]]
   },
 
@@ -378,7 +378,7 @@
     ville: "Lausanne",
     canton: "VD",
     pays: "Suisse",
-    commentaire: "Descente en sens unique, quelques dos d'âne et 2 priorités de droite. Goudron neuf sur la première partie et très correct sur la deuxième ",
+    commentaire: "One-way downhill with a few speed bumps and two right-hand priorities. Fresh asphalt on the first section and very decent on the second. ",
     coordinates:[[46.52135,6.64683],[46.52133,6.64684],[46.52127,6.64679],[46.52122,6.64674],[46.52115,6.64669],[46.52106,6.64662],[46.52088,6.64648],[46.52073,6.64632],[46.52055,6.64611],[46.52034,6.64585],[46.52023,6.64569],[46.52007,6.64552],[46.52001,6.64546],[46.51996,6.64544],[46.51991,6.64544],[46.51962,6.64544],[46.51959,6.64544],[46.51945,6.64544],[46.51933,6.64544],[46.51926,6.64544],[46.51924,6.64543],[46.51923,6.64543],[46.51919,6.64540],[46.51908,6.64533],[46.51892,6.64519],[46.51890,6.64517],[46.51876,6.64505],[46.51871,6.64500],[46.51825,6.64462],[46.51764,6.64414]]
   },
       {
@@ -395,7 +395,7 @@
   pays: "Suisse",
   canton: "VD",
   ville: "Lausanne",
-  commentaire: "descente la plus raide de Lausanne ! Chemin pédestre. Attention, escalier sur la fin !",
+  commentaire: "Steepest downhill in Lausanne! Pedestrian path — watch out for stairs at the end!",
   coordinates: [
     [46.52679, 6.64116],
     [46.52666, 6.64094],
@@ -439,7 +439,7 @@
   pays: "Suisse",
   canton: "VD",
   ville: "Lausanne",
-  commentaire: "Très joli spot, première partie en sens unique avec goudron neuf, deuxieème partie, après le pont, circulation dans les 2 sens",
+  commentaire: "Very nice spot, first part one-way with fresh asphalt, second part after the bridge, two-way traffic.",
   coordinates: [
     [46.51635, 6.64172],
     [46.51613, 6.64162],
@@ -533,7 +533,7 @@
   pays: "Suisse",
   canton: "VD",
   ville: "Pully",
-  commentaire: "joli drop en sens unique, attention les vélos peuvent là remonter",
+  commentaire: "Nice one-way drop, watch out—bikes might come up here.",
   coordinates: [
     [46.52235, 6.65863],
     [46.52227, 6.65860],
@@ -585,7 +585,7 @@
   pays: "Suisse",
   canton: "VD",
   ville: "Pully",
-  commentaire: "Spot cool, bien pentu et pas trop de trafic. Les 100 premiers mètres le goudron est un peu crade mais apprès ça s'améliore. Bien prendre tout droit au premier giratoire",
+  commentaire: "Cool spot, pretty steep and light traffic. The first 100 meters have a bit rough asphalt, then it gets better. Go straight at the first roundabout.",
   coordinates: [
     [46.51992, 6.65902],
     [46.51992, 6.65896],
@@ -725,7 +725,7 @@
   pays: "Suisse",
   canton: "VD",
   ville: "Lausanne",
-  commentaire: "Grosse descente avec pas mal de trafic mais les trottoirs sont praticables",
+  commentaire: "Big descent with quite a bit of traffic, but the sidewalks are rideable.",
   coordinates: [
     [46.53041, 6.64526],
     [46.53037, 6.64523],
@@ -815,7 +815,7 @@
   pays: "Suisse",
   canton: "VD",
   ville: "Lausanne",
-  commentaire: "Jolie descente avec très peu de trafic, idéale pour les débutants",
+  commentaire: "Nice descent with very little traffic, perfect for beginners.",
   coordinates: [
     [46.53177, 6.64542],
     [46.53173, 6.64535],
@@ -912,7 +912,7 @@
   ville: "Lausanne",
   canton: "VD",
   pays: "Suisse",
-  commentaire: "Alternative sympa au début de Papi",
+  commentaire: "Nice alternative at the start of Papi.",
   coordinates: [
     [46.54508, 6.65582],
     [46.54501, 6.65580],
@@ -945,7 +945,7 @@
   ville: "Lausanne",
   canton: "VD",
   pays: "Suisse",
-  commentaire: "goudron pas top, privilégier la piste cyclable sur la gauche",
+  commentaire: "Road surface not great, better to use the bike lane on the left.",
   coordinates: [
     [46.51800, 6.64300],
     [46.51788, 6.64291],
@@ -976,7 +976,7 @@
   ville: "Lausanne",
   canton: "VD",
   pays: "Suisse",
-  commentaire: "Cool avec possibilité de s'arrêter boire une bière à la brasserie du château en bas",
+  commentaire: "Cool spot with the option to stop for a beer at the castle brewery at the bottom.",
   coordinates: [
     [46.52528, 6.63582],
     [46.52521, 6.63569],
@@ -1005,7 +1005,7 @@
   ville: "Lausanne",
   canton: "VD",
   pays: "Suisse",
-  commentaire: "Rue piétonne au centre ville, il peut y avoir du monde vers le bas au niveau du bar sur la gauche",
+  commentaire: "Pedestrian street in the city center, can be busy near the bottom by the bar on the left.",
   coordinates: [
     [46.52212, 6.62928],
     [46.52209, 6.62927],
@@ -1039,7 +1039,7 @@
   ville: "Lausanne",
   canton: "VD",
   pays: "Suisse",
-  commentaire: "Le paradis pour débuter, se perfectionner ou pour chiller un après-midi. Interdite aux voitures",
+  commentaire: "Paradise for beginners, practicing, or just chilling for an afternoon. No cars allowed.",
   coordinates: [
     [46.52313, 6.60757],
     [46.52314, 6.60725],
@@ -1155,7 +1155,7 @@
   ville: "Epalinges",
   canton: "VD",
   pays: "Suisse",
-  commentaire: "Descente mythique lausannoise, le goudron n'est plus au top et il y a des dos d'âne",
+  commentaire: "Iconic Lausanne descent, asphalt is worn out and there are some speed bumps.",
   coordinates: [
     [46.54069, 6.67021],
     [46.54066, 6.67016],
@@ -1207,7 +1207,7 @@
   ville: "Epalinges",
   canton: "VD",
   pays: "Suisse",
-  commentaire: "Route agréable mais raide, bitume neuf.",
+  commentaire: "Nice but steep road, fresh asphalt.",
   coordinates: [
     [46.55029, 6.66009],
     [46.55025, 6.66001],
@@ -1349,7 +1349,7 @@
   ville: "Lausanne",
   canton: "VD",
   pays: "Suisse",
-  commentaire: "Route agréable à sens unique facile mais avec des dos d'âne en pavé et un goudron un peu limite par endroit",
+  commentaire: "Nice one-way easy road, but with cobblestone speed bumps and slightly sketchy asphalt in some spots.",
   coordinates: [
     [46.52102, 6.62244],
     [46.52098, 6.62230],
@@ -1382,11 +1382,11 @@
 
       marker.bindPopup(`
         <b>${spot.nom}</b><br>
-        Bitume: ${'⭐'.repeat(spot.bitume)}<br>
+        Asphalt: ${'⭐'.repeat(spot.bitume)}<br>
         Trafic: ${'🚗'.repeat(spot.trafic)}<br>
-        Longueur: ${spot.longueur || 'N/A'}<br>
-        Pente moyenne: ${spot.penteMoyenne || 'N/A'}<br>
-        <button class="toggle-comment">Commentaire</button>
+        length: ${spot.longueur || 'N/A'}<br>
+        Average slope: ${spot.penteMoyenne || 'N/A'}<br>
+        <button class="toggle-comment">Comment</button>
         <div class="comment-text" style="display:none; margin-top:5px;">
           ${spot.commentaire ? `<i>${spot.commentaire}</i>` : '<i>Aucun commentaire</i>'}
         </div>
@@ -1625,3 +1625,4 @@ Commentaire: ${commentaire}
   </script>
 </body>
 </html>
+
