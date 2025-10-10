@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -58,7 +60,7 @@
   <div id="buttonPanel">
     <button id="filterBtn">Filtrer</button>
     <button id="addSpotBtn">Ajouter un spot</button>
-    <button id="helpBtn">Info</button>
+    <button id="helpBtn">Help</button>
   </div>
 
   <div id="filterPanel">
@@ -74,8 +76,8 @@
       </select>
     </label>
     <label>Nom du spot :
-      <input type="text" id="filterName" placeholder="ex: Béthusy ou bethusy">
-    </label>
+  <input type="text" id="filterName" placeholder="ex: Béthusy ou bethusy">
+</label>
 
     <button id="applyFilterBtn">Appliquer</button>
     <button id="resetFilterBtn" class="filter-btn" style="margin-top: 8px;">Réinitialiser</button>
@@ -121,7 +123,7 @@
 
     // --- Spots ---
     const spots = [
-       {
+      {
         nom: "Les Bains",
         difficulte: "rouge",
         bitume: 5,
@@ -1299,76 +1301,101 @@
     [46.51966, 6.61855]
   ]
 }
+
+
     ];
 
-    const polylines = {};
-    const markers = {};
+   const polylines = {};
+const markers = {};
 
-    function getColorByDifficulty(d) {
-      return d === "bleu" ? "#007bff" : d === "rouge" ? "#ff0000" : "#000000";
-    }
+function addSpotMarker(spot) {
+  const emoji = spot.difficulte === "bleu" ? "🔵" : spot.difficulte === "rouge" ? "🔴" : "⚫";
 
-    function addSpotMarker(spot) {
-      const emoji = spot.difficulte === "bleu" ? "🔵" : spot.difficulte === "rouge" ? "🔴" : "⚫";
+  const marker = L.marker(spot.coordinates[0], {
+    icon: L.divIcon({ className: 'emoji-marker', html: emoji, iconSize: [24, 24] })
+  }).addTo(map);
 
-      const marker = L.marker(spot.coordinates[0], {
-        icon: L.divIcon({ className: 'emoji-marker', html: emoji, iconSize: [24, 24] })
-      }).addTo(map);
+  // Contenu principal du popup
+  marker.bindPopup(`
+    <b>${spot.nom}</b><br>
+    Bitume: ${'⭐'.repeat(spot.bitume)}<br>
+    Trafic: ${'🚗'.repeat(spot.trafic)}<br>
+    Longueur: ${spot.longueur || 'N/A'}<br>
+    Pente moyenne: ${spot.penteMoyenne || 'N/A'}<br>
+    <button class="toggle-comment">Commentaire</button>
+    <div class="comment-text" style="display:none; margin-top:5px;">
+      ${spot.commentaire ? `<i>${spot.commentaire}</i>` : '<i>Aucun commentaire</i>'}
+    </div>
+    <br>
+    <a href="${spot.video}" target="_blank">Vidéo</a><br>
+    <a href="${spot.lien}" target="_blank">Départ Google Maps</a>
+  `);
 
-      marker.bindPopup(`
-        <b>${spot.nom}</b><br>
-        Bitume: ${'⭐'.repeat(spot.bitume)}<br>
-        Trafic: ${'🚗'.repeat(spot.trafic)}<br>
-        Longueur: ${spot.longueur || 'N/A'}<br>
-        Pente moyenne: ${spot.penteMoyenne || 'N/A'}<br>
-        <button class="toggle-comment">Commentaire</button>
-        <div class="comment-text" style="display:none; margin-top:5px;">
-          ${spot.commentaire ? `<i>${spot.commentaire}</i>` : '<i>Aucun commentaire</i>'}
-        </div>
-        <br>
-        <a href="${spot.video}" target="_blank">Vidéo</a><br>
-        <a href="${spot.lien}" target="_blank">Départ Google Maps</a>
-      `);
+  // Quand le popup s’ouvre, on prépare le bouton commentaire
+  marker.on('popupopen', function (e) {
+    const popupNode = e.popup.getElement();
+    const toggleBtn = popupNode.querySelector('.toggle-comment');
+    const commentDiv = popupNode.querySelector('.comment-text');
 
-      marker.on('popupopen', function (e) {
-        const popupNode = e.popup.getElement();
-        const toggleBtn = popupNode.querySelector('.toggle-comment');
-        const commentDiv = popupNode.querySelector('.comment-text');
-        if (toggleBtn && commentDiv) {
-          toggleBtn.addEventListener('click', () => {
-            commentDiv.style.display = commentDiv.style.display === 'none' ? 'block' : 'none';
-          });
-        }
-      });
-
-      marker.on('click', () => {
-        if (polylines[spot.nom]) {
-          map.removeLayer(polylines[spot.nom]);
-          delete polylines[spot.nom];
+    if (toggleBtn && commentDiv) {
+      toggleBtn.addEventListener('click', function () {
+        if (commentDiv.style.display === 'none') {
+          commentDiv.style.display = 'block';
         } else {
-          polylines[spot.nom] = L.polyline(spot.coordinates, { color: getColorByDifficulty(spot.difficulte), weight: 4 }).addTo(map);
+          commentDiv.style.display = 'none';
         }
       });
-
-      markers[spot.nom] = marker;
     }
+  });
 
-    spots.forEach(addSpotMarker);
+  // Gestion du clic sur le marker pour afficher/masquer la polyline
+  marker.on('click', () => {
+    if (polylines[spot.nom]) {
+      map.removeLayer(polylines[spot.nom]);
+      delete polylines[spot.nom];
+    } else {
+      const color =
+        spot.difficulte === "bleu" ? "#007bff" :
+        spot.difficulte === "rouge" ? "#ff0000" :
+        "#000000";
+      polylines[spot.nom] = L.polyline(spot.coordinates, { color: color, weight: 4 }).addTo(map);
+    }
+  });
 
-    const allCoords = [];
-    spots.forEach(s => {
-      if (s.coordinates && s.coordinates.length > 0) allCoords.push(...s.coordinates);
-      else if (s.polyline && s.polyline.length > 0) allCoords.push(...s.polyline);
-      else if (s.lat && s.lng) allCoords.push([s.lat, s.lng]);
-    });
-    if (allCoords.length > 0) map.fitBounds(allCoords);
+  markers[spot.nom] = marker;
+}
 
-    // --- Localisation utilisateur ---
-    map.locate({ setView: false, watch: true, maxZoom: 16 });
-    const userMarker = L.marker([0,0], {
-      icon: L.divIcon({ className: 'emoji-marker', html: "📍", iconSize: [24,24] })
-    }).addTo(map);
-    map.on("locationfound", e => userMarker.setLatLng(e.latlng));
+spots.forEach(addSpotMarker);
+
+
+    // --- Centrer la carte sur tous les spots ---
+const allCoords = [];
+spots.forEach(s => {
+  if (s.coordinates && s.coordinates.length > 0) {
+    allCoords.push(...s.coordinates);
+  } else if (s.polyline && s.polyline.length > 0) {
+    allCoords.push(...s.polyline);
+  } else if (s.lat && s.lng) {
+    allCoords.push([s.lat, s.lng]);
+  }
+});
+
+if (allCoords.length > 0) {
+  map.fitBounds(allCoords);
+}
+
+    // --- Localisation en temps réel ---
+map.locate({ setView: false, watch: true, maxZoom: 16 });
+
+const userMarker = L.marker([0,0], {
+  icon: L.divIcon({ className: 'emoji-marker', html: "📍", iconSize: [24,24] })
+}).addTo(map);
+
+map.on("locationfound", e => {
+  userMarker.setLatLng(e.latlng);
+});
+
+
 
     // --- Boutons ---
     const filterPanel = document.getElementById('filterPanel');
@@ -1377,80 +1404,160 @@
     document.getElementById('filterBtn').addEventListener('click', () => {
       filterPanel.style.display = filterPanel.style.display === 'none' ? 'block' : 'none';
     });
+
     document.getElementById('addSpotBtn').addEventListener('click', () => {
       addSpotPanel.style.display = addSpotPanel.style.display === 'none' ? 'block' : 'none';
     });
+
     document.getElementById('helpBtn').addEventListener('click', () => {
-      alert("Pour toute aide, envoyez un mail à fabricebeg1@gmail.com"); // Remplacé window.location.href qui bloquait parfois
+      window.location.href = 'mailto:fabricebeg1@gmail.com?subject=Aide Freebord';
     });
 
-    // --- Filtres ---
-    function populateFilters() {
-      const countrySet = new Set(), cantonSet = new Set(), citySet = new Set();
-      spots.forEach(s => { countrySet.add(s.pays); cantonSet.add(s.canton); citySet.add(s.ville); });
+ // --- Filtres dynamiques ---
+function populateFilters() {
+  const countrySet = new Set();
+  const cantonSet = new Set();
+  const citySet = new Set();
 
-      const fc = document.getElementById('filterCountry');
-      const fct = document.getElementById('filterCanton');
-      const fci = document.getElementById('filterCity');
+  spots.forEach(s => {
+    countrySet.add(s.pays);
+    cantonSet.add(s.canton);
+    citySet.add(s.ville);
+  });
 
-      countrySet.forEach(c => { const o = document.createElement('option'); o.value=c;o.text=c;fc.add(o); });
-      cantonSet.forEach(c => { const o = document.createElement('option'); o.value=c;o.text=c;fct.add(o); });
-      citySet.forEach(c => { const o = document.createElement('option'); o.value=c;o.text=c;fci.add(o); });
+  const fc = document.getElementById('filterCountry');
+  const fct = document.getElementById('filterCanton');
+  const fci = document.getElementById('filterCity');
+
+  countrySet.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c;
+    o.text = c;
+    fc.add(o);
+  });
+
+  cantonSet.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c;
+    o.text = c;
+    fct.add(o);
+  });
+
+  citySet.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c;
+    o.text = c;
+    fci.add(o);
+  });
+}
+
+populateFilters();
+
+// --- Application des filtres ---
+document.getElementById('applyFilterBtn').addEventListener('click', () => {
+  const country = document.getElementById('filterCountry').value.trim().toLowerCase();
+  const canton = document.getElementById('filterCanton').value.trim().toLowerCase();
+  const city = document.getElementById('filterCity').value.trim().toLowerCase();
+  const difficulty = document.getElementById('filterDifficulty').value.trim().toLowerCase();
+
+  const nameFilter = document.getElementById('filterName').value
+                        .trim()
+                        .toLowerCase()
+                        .normalize("NFD")
+                        .replace(/[\u0300-\u036f]/g, "");
+
+  spots.forEach(s => {
+    const marker = markers[s.nom];
+
+    const spotNameNormalized = s.nom
+                                .toLowerCase()
+                                .normalize("NFD")
+                                .replace(/[\u0300-\u036f]/g, "");
+
+    const match =
+      (country === "" || s.pays.toLowerCase() === country) &&
+      (canton === "" || s.canton.toLowerCase() === canton) &&
+      (city === "" || s.ville.toLowerCase() === city) &&
+      (difficulty === "" || s.difficulte.toLowerCase() === difficulty) &&
+      (nameFilter === "" || spotNameNormalized.includes(nameFilter));
+
+    if (match) {
+      marker.addTo(map);
+    } else {
+      map.removeLayer(marker);
+      if (polylines[s.nom]) {
+        map.removeLayer(polylines[s.nom]);
+        delete polylines[s.nom];
+      }
     }
-    populateFilters();
+  });
 
-    document.getElementById('applyFilterBtn').addEventListener('click', () => {
-      const country = document.getElementById('filterCountry').value.trim().toLowerCase();
-      const canton = document.getElementById('filterCanton').value.trim().toLowerCase();
-      const city = document.getElementById('filterCity').value.trim().toLowerCase();
-      const difficulty = document.getElementById('filterDifficulty').value.trim().toLowerCase();
-      const nameFilter = document.getElementById('filterName').value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  // Ferme le panneau après application
+  document.getElementById('filterPanel').style.display = 'none';
+});
 
-      spots.forEach(s => {
-        const marker = markers[s.nom];
-        const spotNameNormalized = s.nom.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        const match = (country===""||s.pays.toLowerCase()===country) &&
-                      (canton===""||s.canton.toLowerCase()===canton) &&
-                      (city===""||s.ville.toLowerCase()===city) &&
-                      (difficulty===""||s.difficulte.toLowerCase()===difficulty) &&
-                      (nameFilter===""||spotNameNormalized.includes(nameFilter));
-        if (match) marker.addTo(map);
-        else { map.removeLayer(marker); if(polylines[s.nom]) { map.removeLayer(polylines[s.nom]); delete polylines[s.nom]; } }
-      });
-      filterPanel.style.display = 'none';
-    });
 
-    document.getElementById('resetFilterBtn').addEventListener('click', () => {
-      document.getElementById('filterCountry').value="";
-      document.getElementById('filterCanton').value="";
-      document.getElementById('filterCity').value="";
-      document.getElementById('filterDifficulty').value="";
-      document.getElementById('filterName').value="";
-      spots.forEach(s => {
-        const marker = markers[s.nom]; if(!map.hasLayer(marker)) marker.addTo(map);
-        if(s.coordinates && !polylines[s.nom]) polylines[s.nom] = L.polyline(s.coordinates,{color:getColorByDifficulty(s.difficulte)}).addTo(map);
-      });
-    });
+// --- Réinitialisation des filtres ---
+document.getElementById('resetFilterBtn').addEventListener('click', () => {
+  // Réinitialise tous les champs
+  document.getElementById('filterCountry').value = "";
+  document.getElementById('filterCanton').value = "";
+  document.getElementById('filterCity').value = "";
+  document.getElementById('filterDifficulty').value = "";
+  document.getElementById('filterName').value = "";
 
-    // --- Ajouter un spot ---
-    document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('spotSendBtn').addEventListener('click', () => {
-        const nom = document.getElementById('spotName').value.trim();
-        const coords = document.getElementById('spotCoords').value.trim();
-        const ville = document.getElementById('spotCity').value.trim();
-        const canton = document.getElementById('spotCanton').value.trim();
-        const pays = document.getElementById('spotCountry').value.trim();
-        const difficulte = document.getElementById('spotDifficulty').value.trim();
-        const bitume = document.getElementById('spotBitume').value.trim();
-        const trafic = document.getElementById('spotTraffic').value.trim();
-        const video = document.getElementById('spotVideo').value.trim();
-        const commentaire = document.getElementById('spotCommentaire').value.trim() || "Aucun";
+  // Réaffiche tous les spots et polylines
+  spots.forEach(s => {
+    const marker = markers[s.nom];
+    if (!map.hasLayer(marker)) {
+      marker.addTo(map);
+    }
+    if (s.coordinates && !polylines[s.nom]) {
+      const polyline = L.polyline(s.coordinates, { color: getColorByDifficulty(s.difficulte) }).addTo(map);
+      polylines[s.nom] = polyline;
+    }
+  });
+});
 
-        const mailBody = `Nom: ${nom} | Lien Google Maps: ${coords} | Ville: ${ville} | Canton/Région: ${canton} | Pays: ${pays} | Difficulté: ${difficulte} | Bitume: ${bitume} | Trafic: ${trafic} | Vidéo: ${video} | Commentaire: ${commentaire}`.replace(/\n/g,'').trim();
-        const mailtoLink = `mailto:fabricebeg1@gmail.com?subject=${encodeURIComponent('Nouveau Spot')}&body=${encodeURIComponent(mailBody)}`;
-        window.location.href = mailtoLink;
-      });
-    });
+
+
+
+// --- Envoyer un spot ---
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('spotSendBtn').addEventListener('click', () => {
+    const nom = document.getElementById('spotName').value.trim();
+    const coords = document.getElementById('spotCoords').value.trim();
+    const ville = document.getElementById('spotCity').value.trim();
+    const canton = document.getElementById('spotCanton').value.trim();
+    const pays = document.getElementById('spotCountry').value.trim();
+    const difficulte = document.getElementById('spotDifficulty').value.trim();
+    const bitume = document.getElementById('spotBitume').value.trim();
+    const trafic = document.getElementById('spotTraffic').value.trim();
+    const video = document.getElementById('spotVideo').value.trim();
+    const commentaire = document.getElementById('spotCommentaire').value.trim() || "Aucun";
+
+    // Corps du mail compact (évite les retours à la ligne qui causent le troncage)
+    const mailBody = `
+Nom: ${nom} | 
+Lien Google Maps: ${coords} | 
+Ville: ${ville} | 
+Canton/Région: ${canton} | 
+Pays: ${pays} | 
+Difficulté: ${difficulte} | 
+Bitume: ${bitume} | 
+Trafic: ${trafic} | 
+Vidéo: ${video} | 
+Commentaire: ${commentaire}
+    `.replace(/\n/g, '').trim(); // Supprime tout retour à la ligne réel
+
+    // Construction du mailto avec encodage propre
+    const mailtoLink = `mailto:fabricebeg1@gmail.com?subject=${encodeURIComponent('Nouveau Spot')}&body=${encodeURIComponent(mailBody)}`;
+
+    // Ouverture du client mail
+    window.location.href = mailtoLink;
+  });
+});
+
   </script>
 </body>
 </html>
