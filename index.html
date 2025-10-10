@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -76,8 +74,8 @@
       </select>
     </label>
     <label>Nom du spot :
-  <input type="text" id="filterName" placeholder="ex: Béthusy ou bethusy">
-</label>
+      <input type="text" id="filterName" placeholder="ex: Béthusy ou bethusy">
+    </label>
 
     <button id="applyFilterBtn">Appliquer</button>
     <button id="resetFilterBtn" class="filter-btn" style="margin-top: 8px;">Réinitialiser</button>
@@ -113,6 +111,37 @@
 
   <div id="map"></div>
 
+  <!-- Bouton Info en bas à droite -->
+  <div id="infoButton" style="
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    z-index: 1000;
+  ">
+    <button>Info</button>
+  </div>
+
+  <!-- Pop-up Info -->
+  <div id="infoPopup" style="
+    display: none;
+    position: absolute;
+    bottom: 50px;
+    right: 10px;
+    z-index: 1000;
+    background: white;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    max-width: 250px;
+  ">
+    <div style="text-align: right;">
+      <button id="closeInfoPopup" style="background: none; border: none; font-weight: bold; cursor: pointer;">✖</button>
+    </div>
+    <div id="infoText">
+      Ici tu peux mettre ton texte d'information personnalisé.
+    </div>
+  </div>
+
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
     // --- Initialisation carte ---
@@ -123,7 +152,7 @@
 
     // --- Spots ---
     const spots = [
-      {
+{
         nom: "Les Bains",
         difficulte: "rouge",
         bitume: 5,
@@ -1301,101 +1330,89 @@
     [46.51966, 6.61855]
   ]
 }
+      ];
 
+    const polylines = {};
+    const markers = {};
 
-    ];
+    function addSpotMarker(spot) {
+      const emoji = spot.difficulte === "bleu" ? "🔵" : spot.difficulte === "rouge" ? "🔴" : "⚫";
 
-   const polylines = {};
-const markers = {};
+      const marker = L.marker(spot.coordinates[0], {
+        icon: L.divIcon({ className: 'emoji-marker', html: emoji, iconSize: [24, 24] })
+      }).addTo(map);
 
-function addSpotMarker(spot) {
-  const emoji = spot.difficulte === "bleu" ? "🔵" : spot.difficulte === "rouge" ? "🔴" : "⚫";
+      marker.bindPopup(`
+        <b>${spot.nom}</b><br>
+        Bitume: ${'⭐'.repeat(spot.bitume)}<br>
+        Trafic: ${'🚗'.repeat(spot.trafic)}<br>
+        Longueur: ${spot.longueur || 'N/A'}<br>
+        Pente moyenne: ${spot.penteMoyenne || 'N/A'}<br>
+        <button class="toggle-comment">Commentaire</button>
+        <div class="comment-text" style="display:none; margin-top:5px;">
+          ${spot.commentaire ? `<i>${spot.commentaire}</i>` : '<i>Aucun commentaire</i>'}
+        </div>
+        <br>
+        <a href="${spot.video}" target="_blank">Vidéo</a><br>
+        <a href="${spot.lien}" target="_blank">Départ Google Maps</a>
+      `);
 
-  const marker = L.marker(spot.coordinates[0], {
-    icon: L.divIcon({ className: 'emoji-marker', html: emoji, iconSize: [24, 24] })
-  }).addTo(map);
+      marker.on('popupopen', function (e) {
+        const popupNode = e.popup.getElement();
+        const toggleBtn = popupNode.querySelector('.toggle-comment');
+        const commentDiv = popupNode.querySelector('.comment-text');
 
-  // Contenu principal du popup
-  marker.bindPopup(`
-    <b>${spot.nom}</b><br>
-    Bitume: ${'⭐'.repeat(spot.bitume)}<br>
-    Trafic: ${'🚗'.repeat(spot.trafic)}<br>
-    Longueur: ${spot.longueur || 'N/A'}<br>
-    Pente moyenne: ${spot.penteMoyenne || 'N/A'}<br>
-    <button class="toggle-comment">Commentaire</button>
-    <div class="comment-text" style="display:none; margin-top:5px;">
-      ${spot.commentaire ? `<i>${spot.commentaire}</i>` : '<i>Aucun commentaire</i>'}
-    </div>
-    <br>
-    <a href="${spot.video}" target="_blank">Vidéo</a><br>
-    <a href="${spot.lien}" target="_blank">Départ Google Maps</a>
-  `);
-
-  // Quand le popup s’ouvre, on prépare le bouton commentaire
-  marker.on('popupopen', function (e) {
-    const popupNode = e.popup.getElement();
-    const toggleBtn = popupNode.querySelector('.toggle-comment');
-    const commentDiv = popupNode.querySelector('.comment-text');
-
-    if (toggleBtn && commentDiv) {
-      toggleBtn.addEventListener('click', function () {
-        if (commentDiv.style.display === 'none') {
-          commentDiv.style.display = 'block';
-        } else {
-          commentDiv.style.display = 'none';
+        if (toggleBtn && commentDiv) {
+          toggleBtn.addEventListener('click', function () {
+            commentDiv.style.display = commentDiv.style.display === 'none' ? 'block' : 'none';
+          });
         }
       });
+
+      marker.on('click', () => {
+        if (polylines[spot.nom]) {
+          map.removeLayer(polylines[spot.nom]);
+          delete polylines[spot.nom];
+        } else {
+          const color =
+            spot.difficulte === "bleu" ? "#007bff" :
+            spot.difficulte === "rouge" ? "#ff0000" :
+            "#000000";
+          polylines[spot.nom] = L.polyline(spot.coordinates, { color: color, weight: 4 }).addTo(map);
+        }
+      });
+
+      markers[spot.nom] = marker;
     }
-  });
 
-  // Gestion du clic sur le marker pour afficher/masquer la polyline
-  marker.on('click', () => {
-    if (polylines[spot.nom]) {
-      map.removeLayer(polylines[spot.nom]);
-      delete polylines[spot.nom];
-    } else {
-      const color =
-        spot.difficulte === "bleu" ? "#007bff" :
-        spot.difficulte === "rouge" ? "#ff0000" :
-        "#000000";
-      polylines[spot.nom] = L.polyline(spot.coordinates, { color: color, weight: 4 }).addTo(map);
-    }
-  });
-
-  markers[spot.nom] = marker;
-}
-
-spots.forEach(addSpotMarker);
-
+    spots.forEach(addSpotMarker);
 
     // --- Centrer la carte sur tous les spots ---
-const allCoords = [];
-spots.forEach(s => {
-  if (s.coordinates && s.coordinates.length > 0) {
-    allCoords.push(...s.coordinates);
-  } else if (s.polyline && s.polyline.length > 0) {
-    allCoords.push(...s.polyline);
-  } else if (s.lat && s.lng) {
-    allCoords.push([s.lat, s.lng]);
-  }
-});
+    const allCoords = [];
+    spots.forEach(s => {
+      if (s.coordinates && s.coordinates.length > 0) {
+        allCoords.push(...s.coordinates);
+      } else if (s.polyline && s.polyline.length > 0) {
+        allCoords.push(...s.polyline);
+      } else if (s.lat && s.lng) {
+        allCoords.push([s.lat, s.lng]);
+      }
+    });
 
-if (allCoords.length > 0) {
-  map.fitBounds(allCoords);
-}
+    if (allCoords.length > 0) {
+      map.fitBounds(allCoords);
+    }
 
     // --- Localisation en temps réel ---
-map.locate({ setView: false, watch: true, maxZoom: 16 });
+    map.locate({ setView: false, watch: true, maxZoom: 16 });
 
-const userMarker = L.marker([0,0], {
-  icon: L.divIcon({ className: 'emoji-marker', html: "📍", iconSize: [24,24] })
-}).addTo(map);
+    const userMarker = L.marker([0,0], {
+      icon: L.divIcon({ className: 'emoji-marker', html: "📍", iconSize: [24,24] })
+    }).addTo(map);
 
-map.on("locationfound", e => {
-  userMarker.setLatLng(e.latlng);
-});
-
-
+    map.on("locationfound", e => {
+      userMarker.setLatLng(e.latlng);
+    });
 
     // --- Boutons ---
     const filterPanel = document.getElementById('filterPanel');
@@ -1413,131 +1430,99 @@ map.on("locationfound", e => {
       window.location.href = 'mailto:fabricebeg1@gmail.com?subject=Aide Freebord';
     });
 
- // --- Filtres dynamiques ---
-function populateFilters() {
-  const countrySet = new Set();
-  const cantonSet = new Set();
-  const citySet = new Set();
+    // --- Filtres dynamiques ---
+    function populateFilters() {
+      const countrySet = new Set();
+      const cantonSet = new Set();
+      const citySet = new Set();
 
-  spots.forEach(s => {
-    countrySet.add(s.pays);
-    cantonSet.add(s.canton);
-    citySet.add(s.ville);
-  });
+      spots.forEach(s => {
+        countrySet.add(s.pays);
+        cantonSet.add(s.canton);
+        citySet.add(s.ville);
+      });
 
-  const fc = document.getElementById('filterCountry');
-  const fct = document.getElementById('filterCanton');
-  const fci = document.getElementById('filterCity');
+      const fc = document.getElementById('filterCountry');
+      const fct = document.getElementById('filterCanton');
+      const fci = document.getElementById('filterCity');
 
-  countrySet.forEach(c => {
-    const o = document.createElement('option');
-    o.value = c;
-    o.text = c;
-    fc.add(o);
-  });
-
-  cantonSet.forEach(c => {
-    const o = document.createElement('option');
-    o.value = c;
-    o.text = c;
-    fct.add(o);
-  });
-
-  citySet.forEach(c => {
-    const o = document.createElement('option');
-    o.value = c;
-    o.text = c;
-    fci.add(o);
-  });
-}
-
-populateFilters();
-
-// --- Application des filtres ---
-document.getElementById('applyFilterBtn').addEventListener('click', () => {
-  const country = document.getElementById('filterCountry').value.trim().toLowerCase();
-  const canton = document.getElementById('filterCanton').value.trim().toLowerCase();
-  const city = document.getElementById('filterCity').value.trim().toLowerCase();
-  const difficulty = document.getElementById('filterDifficulty').value.trim().toLowerCase();
-
-  const nameFilter = document.getElementById('filterName').value
-                        .trim()
-                        .toLowerCase()
-                        .normalize("NFD")
-                        .replace(/[\u0300-\u036f]/g, "");
-
-  spots.forEach(s => {
-    const marker = markers[s.nom];
-
-    const spotNameNormalized = s.nom
-                                .toLowerCase()
-                                .normalize("NFD")
-                                .replace(/[\u0300-\u036f]/g, "");
-
-    const match =
-      (country === "" || s.pays.toLowerCase() === country) &&
-      (canton === "" || s.canton.toLowerCase() === canton) &&
-      (city === "" || s.ville.toLowerCase() === city) &&
-      (difficulty === "" || s.difficulte.toLowerCase() === difficulty) &&
-      (nameFilter === "" || spotNameNormalized.includes(nameFilter));
-
-    if (match) {
-      marker.addTo(map);
-    } else {
-      map.removeLayer(marker);
-      if (polylines[s.nom]) {
-        map.removeLayer(polylines[s.nom]);
-        delete polylines[s.nom];
-      }
+      countrySet.forEach(c => { const o = document.createElement('option'); o.value=c;o.text=c;fc.add(o); });
+      cantonSet.forEach(c => { const o = document.createElement('option'); o.value=c;o.text=c;fct.add(o); });
+      citySet.forEach(c => { const o = document.createElement('option'); o.value=c;o.text=c;fci.add(o); });
     }
-  });
 
-  // Ferme le panneau après application
-  document.getElementById('filterPanel').style.display = 'none';
-});
+    populateFilters();
 
+    // --- Application des filtres ---
+    document.getElementById('applyFilterBtn').addEventListener('click', () => {
+      const country = document.getElementById('filterCountry').value.trim().toLowerCase();
+      const canton = document.getElementById('filterCanton').value.trim().toLowerCase();
+      const city = document.getElementById('filterCity').value.trim().toLowerCase();
+      const difficulty = document.getElementById('filterDifficulty').value.trim().toLowerCase();
 
-// --- Réinitialisation des filtres ---
-document.getElementById('resetFilterBtn').addEventListener('click', () => {
-  // Réinitialise tous les champs
-  document.getElementById('filterCountry').value = "";
-  document.getElementById('filterCanton').value = "";
-  document.getElementById('filterCity').value = "";
-  document.getElementById('filterDifficulty').value = "";
-  document.getElementById('filterName').value = "";
+      const nameFilter = document.getElementById('filterName').value
+                            .trim()
+                            .toLowerCase()
+                            .normalize("NFD")
+                            .replace(/[\u0300-\u036f]/g, "");
 
-  // Réaffiche tous les spots et polylines
-  spots.forEach(s => {
-    const marker = markers[s.nom];
-    if (!map.hasLayer(marker)) {
-      marker.addTo(map);
-    }
-    if (s.coordinates && !polylines[s.nom]) {
-      const polyline = L.polyline(s.coordinates, { color: getColorByDifficulty(s.difficulte) }).addTo(map);
-      polylines[s.nom] = polyline;
-    }
-  });
-});
+      spots.forEach(s => {
+        const marker = markers[s.nom];
+        const spotNameNormalized = s.nom.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const match =
+          (country === "" || s.pays.toLowerCase() === country) &&
+          (canton === "" || s.canton.toLowerCase() === canton) &&
+          (city === "" || s.ville.toLowerCase() === city) &&
+          (difficulty === "" || s.difficulte.toLowerCase() === difficulty) &&
+          (nameFilter === "" || spotNameNormalized.includes(nameFilter));
 
+        if (match) {
+          marker.addTo(map);
+        } else {
+          map.removeLayer(marker);
+          if (polylines[s.nom]) {
+            map.removeLayer(polylines[s.nom]);
+            delete polylines[s.nom];
+          }
+        }
+      });
 
+      filterPanel.style.display = 'none';
+    });
 
+    // --- Réinitialisation des filtres ---
+    document.getElementById('resetFilterBtn').addEventListener('click', () => {
+      document.getElementById('filterCountry').value = "";
+      document.getElementById('filterCanton').value = "";
+      document.getElementById('filterCity').value = "";
+      document.getElementById('filterDifficulty').value = "";
+      document.getElementById('filterName').value = "";
 
-// --- Envoyer un spot ---
-document.addEventListener('DOMContentLoaded', function() {
-  document.getElementById('spotSendBtn').addEventListener('click', () => {
-    const nom = document.getElementById('spotName').value.trim();
-    const coords = document.getElementById('spotCoords').value.trim();
-    const ville = document.getElementById('spotCity').value.trim();
-    const canton = document.getElementById('spotCanton').value.trim();
-    const pays = document.getElementById('spotCountry').value.trim();
-    const difficulte = document.getElementById('spotDifficulty').value.trim();
-    const bitume = document.getElementById('spotBitume').value.trim();
-    const trafic = document.getElementById('spotTraffic').value.trim();
-    const video = document.getElementById('spotVideo').value.trim();
-    const commentaire = document.getElementById('spotCommentaire').value.trim() || "Aucun";
+      spots.forEach(s => {
+        const marker = markers[s.nom];
+        if (!map.hasLayer(marker)) { marker.addTo(map); }
+        if (s.coordinates && !polylines[s.nom]) {
+          const polyline = L.polyline(s.coordinates, { color: getColorByDifficulty(s.difficulte) }).addTo(map);
+          polylines[s.nom] = polyline;
+        }
+      });
+    });
 
-    // Corps du mail compact (évite les retours à la ligne qui causent le troncage)
-    const mailBody = `
+    // --- Envoyer un spot ---
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('spotSendBtn').addEventListener('click', () => {
+        const nom = document.getElementById('spotName').value.trim();
+        const coords = document.getElementById('spotCoords').value.trim();
+        const ville = document.getElementById('spotCity').value.trim();
+        const canton = document.getElementById('spotCanton').value.trim();
+        const pays = document.getElementById('spotCountry').value.trim();
+        const difficulte = document.getElementById('spotDifficulty').value.trim();
+        const bitume = document.getElementById('spotBitume').value.trim();
+        const trafic = document.getElementById('spotTraffic').value.trim();
+        const video = document.getElementById('spotVideo').value.trim();
+        const commentaire = document.getElementById('spotCommentaire').value.trim() || "Aucun";
+
+        const mailBody = `
 Nom: ${nom} | 
 Lien Google Maps: ${coords} | 
 Ville: ${ville} | 
@@ -1548,16 +1533,25 @@ Bitume: ${bitume} |
 Trafic: ${trafic} | 
 Vidéo: ${video} | 
 Commentaire: ${commentaire}
-    `.replace(/\n/g, '').trim(); // Supprime tout retour à la ligne réel
+        `.replace(/\n/g, '').trim();
 
-    // Construction du mailto avec encodage propre
-    const mailtoLink = `mailto:fabricebeg1@gmail.com?subject=${encodeURIComponent('Nouveau Spot')}&body=${encodeURIComponent(mailBody)}`;
+        const mailtoLink = `mailto:fabricebeg1@gmail.com?subject=${encodeURIComponent('Nouveau Spot')}&body=${encodeURIComponent(mailBody)}`;
+        window.location.href = mailtoLink;
+      });
+    });
 
-    // Ouverture du client mail
-    window.location.href = mailtoLink;
-  });
-});
+    // --- Bouton Info ---
+    const infoButton = document.getElementById('infoButton');
+    const infoPopup = document.getElementById('infoPopup');
+    const closeInfoPopup = document.getElementById('closeInfoPopup');
 
+    infoButton.querySelector('button').addEventListener('click', () => {
+      infoPopup.style.display = 'block';
+    });
+
+    closeInfoPopup.addEventListener('click', () => {
+      infoPopup.style.display = 'none';
+    });
   </script>
 </body>
 </html>
