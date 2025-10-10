@@ -115,7 +115,6 @@
 
   <div id="map"></div>
 
-
 <!-- Bouton Info en bas à droite -->
 <div id="infoButton" style="
   position: absolute;
@@ -133,6 +132,22 @@
   ">ℹ️</button>
 </div>
 
+<!-- Bouton English en bas à gauche -->
+<div id="englishButton" style="
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  z-index: 1000;
+">
+  <button style="
+    font-size: 16px;
+    padding: 8px 12px;
+    border-radius: 5px;
+    background: white;
+    border: 2px solid #007bff;
+    cursor: pointer;
+  " onclick="window.location.href='index-eng.html'">English</button>
+</div>
 
   <!-- Pop-up Info -->
   <div id="infoPopup" style="
@@ -173,8 +188,7 @@
 
     // --- Spots ---
     const spots = [
-{
-        nom: "Les Bains",
+	nom: "Les Bains",
         difficulte: "rouge",
         bitume: 5,
         trafic: 3,
@@ -1351,6 +1365,7 @@
     [46.51966, 6.61855]
   ]
 }
+
       ];
 
     const polylines = {};
@@ -1457,7 +1472,6 @@ function populateFilters() {
   const fct = document.getElementById('filterCanton');
   const fci = document.getElementById('filterCity');
 
-  // Fonction pour remplir un select avec un ensemble
   function fillSelect(select, values) {
     select.innerHTML = '<option value="">Tous</option>';
     Array.from(values).sort().forEach(v => {
@@ -1468,7 +1482,6 @@ function populateFilters() {
     });
   }
 
-  // Initialement, tous les pays, cantons et villes
   const countries = new Set(spots.map(s => s.pays));
   const cantons = new Set(spots.map(s => s.canton));
   const cities = new Set(spots.map(s => s.ville));
@@ -1477,7 +1490,6 @@ function populateFilters() {
   fillSelect(fct, cantons);
   fillSelect(fci, cities);
 
-  // --- Mise à jour dynamique des cantons et villes selon le pays ---
   fc.addEventListener('change', () => {
     const selectedCountry = fc.value;
     const filteredCantons = new Set(spots.filter(s => !selectedCountry || s.pays === selectedCountry).map(s => s.canton));
@@ -1487,7 +1499,6 @@ function populateFilters() {
     fillSelect(fci, filteredCities);
   });
 
-  // --- Mise à jour dynamique des villes selon le canton ---
   fct.addEventListener('change', () => {
     const selectedCountry = fc.value;
     const selectedCanton = fct.value;
@@ -1546,7 +1557,6 @@ document.getElementById('resetFilterBtn').addEventListener('click', () => {
   document.getElementById('filterDifficulty').value = "";
   document.getElementById('filterName').value = "";
 
-  // Réaffiche tous les spots et polylines
   spots.forEach(s => {
     const marker = markers[s.nom];
     if (!map.hasLayer(marker)) { marker.addTo(map); }
@@ -1556,10 +1566,8 @@ document.getElementById('resetFilterBtn').addEventListener('click', () => {
     }
   });
 
-  // Repeuple tous les selects à l'état initial
   populateFilters();
 });
-
 
     // --- Envoyer un spot ---
     document.addEventListener('DOMContentLoaded', function() {
@@ -1608,10 +1616,3 @@ Commentaire: ${commentaire}
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
