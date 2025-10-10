@@ -6,6 +6,7 @@
   <title>Ride my Spots</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
+    html, body { height: 100%; margin: 0; padding: 0; } /* Important pour éviter écran noir */
     #map { height: 100vh; }
     .emoji-marker { font-size: 24px; line-height: 24px; text-align: center; }
     .leaflet-popup-content { font-size: 14px; }
@@ -29,7 +30,7 @@
     /* Fenêtres filtrage et ajout spot */
     #filterPanel, #addSpotPanel {
       position: absolute;
-      top: 50px; /* décalé pour ne pas chevaucher les boutons */
+      top: 50px;
       right: 10px;
       z-index: 1000;
       background: white;
@@ -81,73 +82,73 @@
     <button id="resetFilterBtn" class="filter-btn" style="margin-top: 8px;">Réinitialiser</button>
   </div>
 
- <div id="addSpotPanel">
-  <div id="addSpotInfo" style="background:#f0f0f0; padding:5px 10px; margin-bottom:10px; border-radius:3px; font-weight:bold;">
-    Merci de lire les informations avant de remplir le formulaire.
-  </div>
+  <div id="addSpotPanel">
+    <div id="addSpotInfo" style="background:#f0f0f0; padding:5px 10px; margin-bottom:10px; border-radius:3px; font-weight:bold;">
+      Merci de lire les informations avant de remplir le formulaire.
+    </div>
 
-  <label>Nom: <input type="text" id="spotName"></label>
-  <label>Lien Google Maps du tracé: <input type="text" id="spotCoords" placeholder="https://www.google.com/maps/..."></label>
-  <label>Ville: <input type="text" id="spotCity"></label>
-  <label>Canton/Région: <input type="text" id="spotCanton"></label>
-  <label>Pays: <input type="text" id="spotCountry"></label>
-  <label>Commentaire: <input type="text" id="spotCommentaire" placeholder="Votre commentaire ici"></label>
-  <label>Difficulté: 
-    <select id="spotDifficulty">
-      <option value="bleu">Facile</option>
-      <option value="rouge">Moyen</option>
-      <option value="noir">Difficile</option>
-    </select>
-  </label>
-  <label>Bitume (1-5): 
-    <select id="spotBitume">
-      <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
-    </select>
-  </label>
-  <label>Trafic (1-5): 
-    <select id="spotTraffic">
-      <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
-    </select>
-  </label>
-  <label>Vidéo (URL): <input type="text" id="spotVideo"></label>
-  <button id="spotSendBtn">Envoyer</button>
-</div>
+    <label>Nom: <input type="text" id="spotName"></label>
+    <label>Lien Google Maps du tracé: <input type="text" id="spotCoords" placeholder="https://www.google.com/maps/..."></label>
+    <label>Ville: <input type="text" id="spotCity"></label>
+    <label>Canton/Région: <input type="text" id="spotCanton"></label>
+    <label>Pays: <input type="text" id="spotCountry"></label>
+    <label>Commentaire: <input type="text" id="spotCommentaire" placeholder="Votre commentaire ici"></label>
+    <label>Difficulté: 
+      <select id="spotDifficulty">
+        <option value="bleu">Facile</option>
+        <option value="rouge">Moyen</option>
+        <option value="noir">Difficile</option>
+      </select>
+    </label>
+    <label>Bitume (1-5): 
+      <select id="spotBitume">
+        <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+      </select>
+    </label>
+    <label>Trafic (1-5): 
+      <select id="spotTraffic">
+        <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+      </select>
+    </label>
+    <label>Vidéo (URL): <input type="text" id="spotVideo"></label>
+    <button id="spotSendBtn">Envoyer</button>
+  </div>
 
   <div id="map"></div>
 
-<!-- Bouton Info en bas à droite -->
-<div id="infoButton" style="
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  z-index: 1000;
-">
-  <button style="
-    font-size: 24px;
-    padding: 10px;
-    border-radius: 50%;
-    background: white;
-    border: 2px solid #007bff;
-    cursor: pointer;
-  ">ℹ️</button>
-</div>
+  <!-- Bouton Info en bas à droite -->
+  <div id="infoButton" style="
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    z-index: 1000;
+  ">
+    <button style="
+      font-size: 24px;
+      padding: 10px;
+      border-radius: 50%;
+      background: white;
+      border: 2px solid #007bff;
+      cursor: pointer;
+    ">ℹ️</button>
+  </div>
 
-<!-- Bouton English en bas à gauche -->
-<div id="englishButton" style="
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  z-index: 1000;
-">
-  <button style="
-    font-size: 16px;
-    padding: 8px 12px;
-    border-radius: 5px;
-    background: white;
-    border: 2px solid #007bff;
-    cursor: pointer;
-  " onclick="window.location.href='index-eng.html'">English</button>
-</div>
+  <!-- Bouton English en bas à gauche -->
+  <div id="englishButton" style="
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    z-index: 1000;
+  ">
+    <button style="
+      font-size: 16px;
+      padding: 8px 12px;
+      border-radius: 5px;
+      background: white;
+      border: 2px solid #007bff;
+      cursor: pointer;
+    " onclick="window.location.href='index-eng.html'">English</button>
+  </div>
 
   <!-- Pop-up Info -->
   <div id="infoPopup" style="
@@ -166,15 +167,11 @@
       <button id="closeInfoPopup" style="background: none; border: none; font-weight: bold; cursor: pointer;">✖</button>
     </div>
     <div id="infoText">
-      Pour l'ajout d'un spot :<br>
-      <br>
-      - Merci mettre uniquement le tracé du spot et pas le chemin pour s'y rendre. Dans les informations des spots, vous trouverez toujours un lien google Map pour vous y rendre.<br>
-<br>
-      Général : <br>
-      <br>
-      La difficulté et la qualité du bitume des spots sont des appréciations peronnelles selon le niveau, le ressenti et la discipline (Roller, Freebord, Longboard, etc, etc, ...) de la personne qui a soumis le spot.<br>
-<br>
-                Le trafic est également une information qui peut varier selon l'heure et le jour où vous allez le rider.<br>
+      Pour l'ajout d'un spot :<br><br>
+      - Merci mettre uniquement le tracé du spot et pas le chemin pour s'y rendre. Dans les informations des spots, vous trouverez toujours un lien google Map pour vous y rendre.<br><br>
+      Général : <br><br>
+      La difficulté et la qualité du bitume des spots sont des appréciations peronnelles selon le niveau, le ressenti et la discipline (Roller, Freebord, Longboard, etc, etc, ...) de la personne qui a soumis le spot.<br><br>
+      Le trafic est également une information qui peut varier selon l'heure et le jour où vous allez le rider.<br>
     </div>
   </div>
 
@@ -188,7 +185,8 @@
 
     // --- Spots ---
     const spots = [
-	nom: "Les Bains",
+{
+        nom: "Les Bains",
         difficulte: "rouge",
         bitume: 5,
         trafic: 3,
@@ -1365,8 +1363,7 @@
     [46.51966, 6.61855]
   ]
 }
-
-      ];
+    ];
 
     const polylines = {};
     const markers = {};
@@ -1466,108 +1463,109 @@
       window.location.href = 'mailto:fabricebeg1@gmail.com?subject=Aide Freebord';
     });
 
-  // --- Filtres dynamiques en cascade ---
-function populateFilters() {
-  const fc = document.getElementById('filterCountry');
-  const fct = document.getElementById('filterCanton');
-  const fci = document.getElementById('filterCity');
+    // --- Filtres dynamiques en cascade ---
+    function populateFilters() {
+      const fc = document.getElementById('filterCountry');
+      const fct = document.getElementById('filterCanton');
+      const fci = document.getElementById('filterCity');
 
-  function fillSelect(select, values) {
-    select.innerHTML = '<option value="">Tous</option>';
-    Array.from(values).sort().forEach(v => {
-      const o = document.createElement('option');
-      o.value = v;
-      o.text = v;
-      select.add(o);
-    });
-  }
-
-  const countries = new Set(spots.map(s => s.pays));
-  const cantons = new Set(spots.map(s => s.canton));
-  const cities = new Set(spots.map(s => s.ville));
-
-  fillSelect(fc, countries);
-  fillSelect(fct, cantons);
-  fillSelect(fci, cities);
-
-  fc.addEventListener('change', () => {
-    const selectedCountry = fc.value;
-    const filteredCantons = new Set(spots.filter(s => !selectedCountry || s.pays === selectedCountry).map(s => s.canton));
-    fillSelect(fct, filteredCantons);
-
-    const filteredCities = new Set(spots.filter(s => !selectedCountry || s.pays === selectedCountry).map(s => s.ville));
-    fillSelect(fci, filteredCities);
-  });
-
-  fct.addEventListener('change', () => {
-    const selectedCountry = fc.value;
-    const selectedCanton = fct.value;
-    const filteredCities = new Set(spots.filter(s => 
-      (!selectedCountry || s.pays === selectedCountry) &&
-      (!selectedCanton || s.canton === selectedCanton)
-    ).map(s => s.ville));
-    fillSelect(fci, filteredCities);
-  });
-}
-
-populateFilters();
-
-// --- Application des filtres ---
-document.getElementById('applyFilterBtn').addEventListener('click', () => {
-  const country = document.getElementById('filterCountry').value.trim().toLowerCase();
-  const canton = document.getElementById('filterCanton').value.trim().toLowerCase();
-  const city = document.getElementById('filterCity').value.trim().toLowerCase();
-  const difficulty = document.getElementById('filterDifficulty').value.trim().toLowerCase();
-
-  const nameFilter = document.getElementById('filterName').value
-                        .trim()
-                        .toLowerCase()
-                        .normalize("NFD")
-                        .replace(/[\u0300-\u036f]/g, "");
-
-  spots.forEach(s => {
-    const marker = markers[s.nom];
-    const spotNameNormalized = s.nom.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    const match =
-      (country === "" || s.pays.toLowerCase() === country) &&
-      (canton === "" || s.canton.toLowerCase() === canton) &&
-      (city === "" || s.ville.toLowerCase() === city) &&
-      (difficulty === "" || s.difficulte.toLowerCase() === difficulty) &&
-      (nameFilter === "" || spotNameNormalized.includes(nameFilter));
-
-    if (match) {
-      marker.addTo(map);
-    } else {
-      map.removeLayer(marker);
-      if (polylines[s.nom]) {
-        map.removeLayer(polylines[s.nom]);
-        delete polylines[s.nom];
+      function fillSelect(select, values) {
+        select.innerHTML = '<option value="">Tous</option>';
+        Array.from(values).sort().forEach(v => {
+          const o = document.createElement('option');
+          o.value = v;
+          o.text = v;
+          select.add(o);
+        });
       }
+
+      const countries = new Set(spots.map(s => s.pays));
+      const cantons = new Set(spots.map(s => s.canton));
+      const cities = new Set(spots.map(s => s.ville));
+
+      fillSelect(fc, countries);
+      fillSelect(fct, cantons);
+      fillSelect(fci, cities);
+
+      fc.addEventListener('change', () => {
+        const selectedCountry = fc.value;
+        const filteredCantons = new Set(spots.filter(s => !selectedCountry || s.pays === selectedCountry).map(s => s.canton));
+        fillSelect(fct, filteredCantons);
+
+        const filteredCities = new Set(spots.filter(s => !selectedCountry || s.pays === selectedCountry).map(s => s.ville));
+        fillSelect(fci, filteredCities);
+      });
+
+      fct.addEventListener('change', () => {
+        const selectedCountry = fc.value;
+        const selectedCanton = fct.value;
+        const filteredCities = new Set(spots.filter(s => 
+          (!selectedCountry || s.pays === selectedCountry) &&
+          (!selectedCanton || s.canton === selectedCanton)
+        ).map(s => s.ville));
+        fillSelect(fci, filteredCities);
+      });
     }
-  });
 
-  filterPanel.style.display = 'none';
-});
+    populateFilters();
 
-// --- Réinitialisation des filtres ---
-document.getElementById('resetFilterBtn').addEventListener('click', () => {
-  document.getElementById('filterCountry').value = "";
-  document.getElementById('filterCanton').value = "";
-  document.getElementById('filterCity').value = "";
-  document.getElementById('filterDifficulty').value = "";
-  document.getElementById('filterName').value = "";
+    // --- Application des filtres ---
+    document.getElementById('applyFilterBtn').addEventListener('click', () => {
+      const country = document.getElementById('filterCountry').value.trim().toLowerCase();
+      const canton = document.getElementById('filterCanton').value.trim().toLowerCase();
+      const city = document.getElementById('filterCity').value.trim().toLowerCase();
+      const difficulty = document.getElementById('filterDifficulty').value.trim().toLowerCase();
 
-  spots.forEach(s => {
-    const marker = markers[s.nom];
-    if (!map.hasLayer(marker)) { marker.addTo(map); }
-    if (s.coordinates && !polylines[s.nom]) {
-      const polyline = L.polyline(s.coordinates, { color: getColorByDifficulty(s.difficulte) }).addTo(map);
-      polylines[s.nom] = polyline;
-    }
-  });
+      const nameFilter = document.getElementById('filterName').value
+                            .trim()
+                            .toLowerCase()
+                            .normalize("NFD")
+                            .replace(/[\u0300-\u036f]/g, "");
 
-  populateFilters();
-});
+      spots.forEach(s => {
+        const marker = markers[s.nom];
+        const spotNameNormalized = s.nom.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const match =
+          (country === "" || s.pays.toLowerCase() === country) &&
+          (canton === "" || s.canton.toLowerCase() === canton) &&
+          (city === "" || s.ville.toLowerCase() === city) &&
+          (difficulty === "" || s.difficulte.toLowerCase() === difficulty) &&
+          (nameFilter === "" || spotNameNormalized.includes(nameFilter));
+
+        if (match) {
+          marker.addTo(map);
+        } else {
+          map.removeLayer(marker);
+          if (polylines[s.nom]) {
+            map.removeLayer(polylines[s.nom]);
+            delete polylines[s.nom];
+          }
+        }
+      });
+
+      filterPanel.style.display = 'none';
+    });
+
+    // --- Réinitialisation des filtres ---
+    document.getElementById('resetFilterBtn').addEventListener('click', () => {
+      document.getElementById('filterCountry').value = "";
+      document.getElementById('filterCanton').value = "";
+      document.getElementById('filterCity').value = "";
+      document.getElementById('filterDifficulty').value = "";
+      document.getElementById('filterName').value = "";
+
+      spots.forEach(s => {
+        const marker = markers[s.nom];
+        if (!map.hasLayer(marker)) { marker.addTo(map); }
+        if (s.coordinates && !polylines[s.nom]) {
+          const color = s.difficulte === "bleu" ? "#007bff" : s.difficulte === "rouge" ? "#ff0000" : "#000000";
+          const polyline = L.polyline(s.coordinates, { color: color }).addTo(map);
+          polylines[s.nom] = polyline;
+        }
+      });
+
+      populateFilters();
+    });
 
     // --- Envoyer un spot ---
     document.addEventListener('DOMContentLoaded', function() {
